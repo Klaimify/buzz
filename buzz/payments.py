@@ -106,7 +106,7 @@ def record_payment(
 
 
 def mark_payment_as_received(reference_doctype: str, reference_docname: str):
-	if frappe.in_test:
+	if frappe.flags.in_test:
 		return
 
 	import json
