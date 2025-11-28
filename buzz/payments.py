@@ -74,7 +74,7 @@ def get_payment_link(
 		"redirect_to": redirect_to,
 		"payment": payment.name,
 	}
-	if payment_gateway == "Razorpay" or payment_gateway == "Paymob":
+	if payment_gateway == "Paymob":
 		order = controller.create_order(**payment_details)
 		payment_details.update({"order_id": order.get("id")})
 
