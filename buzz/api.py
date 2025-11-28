@@ -155,7 +155,7 @@ def get_event_booking_data(event_route: str) -> dict:
 
 
 @frappe.whitelist()
-def process_booking(attendees: list[dict], event: str, booking_custom_fields: dict | None = None) -> dict:
+def process_booking(attendees: list[dict], event: str, booking_custom_fields: dict | None = None, redirect_url="/dashboard/bookings/") -> dict:
 	booking = frappe.new_doc("Event Booking")
 	booking.event = event
 	booking.user = frappe.session.user
@@ -212,7 +212,7 @@ def process_booking(attendees: list[dict], event: str, booking_custom_fields: di
 
 	return {
 		"payment_link": get_payment_link_for_booking(
-			booking.name, redirect_to=f"/dashboard/bookings/{booking.name}?success=true"
+			booking.name, redirect_to=f"{redirect_url}?booking_id={booking.name}&success=true"
 		)
 	}
 
@@ -327,6 +327,41 @@ def send_ticket_transfer_emails(ticket_id: str, old_name: str, old_email: str, n
 
 
 @frappe.whitelist()
+def update_ticket_coupon(ticket_id: str, coupon_code: str = None):
+	"""Update the coupon used for a ticket."""
+	# Validate ticket exists
+	if not frappe.db.exists("Event Ticket", ticket_id):
+		frappe.throw(frappe._("Ticket not found."))
+
+	ticket = frappe.get_doc("Event Ticket", ticket_id)
+
+	# If coupon_code is provided, validate it
+	if coupon_code:
+		coupon = frappe.db.get_value(
+			"Bulk Ticket Coupon",
+			{"code": coupon_code, "event": ticket.event},
+			["name", "ticket_type"],
+			as_dict=True,
+		)
+		
+		if not coupon:
+			frappe.throw(frappe._("Invalid coupon code for this event."))
+		
+		# Validate coupon is for the correct ticket type
+		if coupon.ticket_type != ticket.ticket_type:
+			frappe.throw(frappe._("This coupon is not valid for this ticket type."))
+		
+		ticket.coupon_used = coupon.name
+	else:
+		# Clear the coupon
+		ticket.coupon_used = None
+
+	ticket.save(ignore_permissions=True)
+	
+	return {"success": True, "message": "Coupon updated successfully"}
+
+
+@frappe.whitelist()
 def get_booking_details(booking_id: str) -> dict:
 	"""Get detailed information about a specific booking."""
 	details = frappe._dict()
@@ -341,9 +376,11 @@ def get_booking_details(booking_id: str) -> dict:
 			"attendee_name",
 			"attendee_email",
 			"ticket_type.title as ticket_type",
+			"ticket_type",
 			"qr_code",
 			"event",
 			"docstatus",
+			"coupon_used",
 		],
 	)
 
@@ -374,6 +411,13 @@ def get_booking_details(booking_id: str) -> dict:
 				event_add_on.options.split("\n") if event_add_on.options else []
 			)
 
+	# Get available coupons for the event
+	available_coupons = frappe.db.get_all(
+		"Bulk Ticket Coupon",
+		filters={"event": booking_doc.event},
+		fields=["name", "code", "ticket_type", "number_of_granted_tickets"],
+	)
+
 	for ticket in tickets:
 		ticket.add_ons = []
 		for add_on in add_ons:
@@ -388,6 +432,24 @@ def get_booking_details(booking_id: str) -> dict:
 				}
 				ticket.add_ons.append(add_on_data)
 		ticket.add_ons = sorted(ticket.add_ons, key=lambda x: x["title"])
+		
+		# Get current coupon code if one is applied
+		if ticket.coupon_used:
+			current_coupon = frappe.db.get_value(
+				"Bulk Ticket Coupon",
+				ticket.coupon_used,
+				"code"
+			)
+			ticket.coupon_code = current_coupon
+		else:
+			ticket.coupon_code = None
+		
+		# Add available coupons for this ticket's type
+		ticket.available_coupons = [
+			{"label": coupon.code, "value": coupon.name}
+			for coupon in available_coupons
+			if coupon.ticket_type == ticket.ticket_type
+		]
 
 	details.tickets = tickets
 	details.event = frappe.get_cached_doc("Buzz Event", booking_doc.event)
