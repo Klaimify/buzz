@@ -1,7 +1,7 @@
 # Copyright (c) 2025, BWH Studios and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
 from frappe.model.document import Document
 
 
@@ -15,14 +15,18 @@ class BuzzCustomField(Document):
 		from frappe.types import DF
 
 		applied_to: DF.Literal["Booking", "Ticket"]
+		default_value: DF.Data | None
 		enabled: DF.Check
 		event: DF.Link
 		fieldname: DF.Data | None
-		fieldtype: DF.Literal["Data", "Phone", "Email", "Select"]
+		fieldtype: DF.Literal["Data", "Phone", "Email", "Select", "Date", "Number"]
 		label: DF.Data
 		mandatory: DF.Check
 		options: DF.SmallText | None
+		order: DF.Int
 		placeholder: DF.Data | None
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		if not self.fieldname:
+			self.fieldname = frappe.scrub(self.label)

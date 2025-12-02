@@ -9,14 +9,14 @@
 			<img
 				:src="eventDetails.banner_image"
 				:alt="eventDetails.title"
-				class="w-full h-full object-cover"
+				class="w-full h-full object-cover contrast-100 brightness-100"
 			/>
 		</div>
 
 		<!-- Event Info without banner -->
 		<div v-else class="mb-6">
 			<h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-ink-gray-9 mb-4">
-				{{ eventDetails.title }}
+				{{ __(eventDetails.title) }}
 			</h1>
 		</div>
 
@@ -27,7 +27,7 @@
 				<div v-if="eventDetails.start_date" class="flex flex-col items-start gap-3">
 					<div class="flex items-center gap-2">
 						<LucideCalendar class="h-4 w-4 text-ink-gray-6" />
-						<p class="text-ink-gray-6 text-base">Date</p>
+						<p class="text-ink-gray-6 text-base">{{ __("Date") }}</p>
 					</div>
 					<div>
 						<p class="font-medium text-ink-gray-8">
@@ -40,7 +40,7 @@
 				<div v-if="eventDetails.start_time" class="flex flex-col items-start gap-3">
 					<div class="flex gap-2 items-center">
 						<LucideClock class="h-4 w-4 text-ink-gray-6" />
-						<p class="text-ink-gray-6 text-base">Time</p>
+						<p class="text-ink-gray-6 text-base">{{ __("Time") }}</p>
 					</div>
 					<div>
 						<p class="font-medium text-ink-gray-8">
@@ -53,7 +53,7 @@
 				<div v-if="eventDetails.venue" class="flex flex-col items-start gap-3">
 					<div class="flex items-center gap-2">
 						<LucideMapPin class="h-4 w-4 text-ink-gray-6" />
-						<p class="text-ink-gray-6 text-base">Venue</p>
+						<p class="text-ink-gray-6 text-base">{{ __("Venue") }}</p>
 					</div>
 					<div>
 						<p class="font-medium text-ink-gray-8">{{ eventDetails.venue }}</p>
@@ -66,7 +66,9 @@
 				v-if="eventDetails.short_description"
 				class="mt-4 pt-4 border-t border-outline-gray-2"
 			>
-				<p class="text-ink-gray-7 leading-relaxed">{{ eventDetails.short_description }}</p>
+				<p class="text-ink-gray-7 leading-relaxed">
+					{{ __(eventDetails.short_description) }}
+				</p>
 			</div>
 		</div>
 	</div>

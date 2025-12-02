@@ -15,7 +15,7 @@
 						<CustomFieldsSection
 							v-model="bookingCustomFieldsData"
 							:custom-fields="bookingCustomFields"
-							title="Booking Information"
+							:title="__('Booking Information')"
 						/>
 					</div>
 
@@ -39,7 +39,7 @@
 							@click="addAttendee"
 							class="w-full max-w-md border-dashed border-2 border-outline-gray-2 hover:border-outline-gray-3 text-ink-gray-7 hover:text-ink-gray-8 py-4"
 						>
-							+ Add Another Attendee
+							{{ __("+ Add Another Attendee") }}
 						</Button>
 					</div>
 				</div>
@@ -66,10 +66,10 @@
 							>
 								{{
 									processBooking.loading
-										? "Processing..."
+										? __("Processing...")
 										: finalTotal > 0
-										? "Pay & Book"
-										: "Book Tickets"
+										? __("Pay & Book")
+										: __("Book Tickets")
 								}}
 							</Button>
 						</div>
@@ -153,18 +153,28 @@ const ticketCustomFields = computed(() =>
 	props.customFields.filter((field) => field.applied_to === "Ticket")
 );
 
-// --- METHODS ---
+const getDefaultTicketType = () => {
+	// Use the default ticket type from event details if set
+	const defaultTicketType = props.eventDetails?.default_ticket_type;
+	if (defaultTicketType) {
+		// Verify that the default ticket type is available
+		const isAvailable = props.availableTicketTypes.some((tt) => tt.name == defaultTicketType);
+		if (isAvailable) {
+			return defaultTicketType;
+		}
+	}
+	// Fall back to the first available ticket type
+	return props.availableTicketTypes[0]?.name || "";
+};
+
 const createNewAttendee = () => {
 	attendeeIdCounter.value++;
 	const newAttendee = {
 		id: attendeeIdCounter.value,
 		full_name: "",
 		email: "",
-		// Auto-select ticket type if there's only one available
-		ticket_type:
-			props.availableTicketTypes.length === 1
-				? props.availableTicketTypes[0]?.name
-				: props.availableTicketTypes[0]?.name || "",
+		// Use default ticket type from event details, or first available
+		ticket_type: getDefaultTicketType(),
 		add_ons: {},
 		custom_fields: {},
 	};
@@ -174,6 +184,14 @@ const createNewAttendee = () => {
 			option: addOn.options ? addOn.options[0] || null : null,
 		};
 	}
+
+	// Initialize custom fields with default values
+	for (const field of ticketCustomFields.value) {
+		if (field.default_value) {
+			newAttendee.custom_fields[field.fieldname] = field.default_value;
+		}
+	}
+
 	return newAttendee;
 };
 
@@ -310,15 +328,31 @@ watch(
 	{ immediate: true, deep: true }
 );
 
-// Auto-select ticket type if there's only one available
+// Auto-select ticket type based on event's default or if there's only one available
 watch(
 	() => props.availableTicketTypes,
 	(newTicketTypes) => {
-		if (newTicketTypes && newTicketTypes.length === 1) {
-			// Auto-select the only ticket type for all attendees
+		if (newTicketTypes && newTicketTypes.length > 0) {
+			const defaultTicketType = getDefaultTicketType();
 			for (const attendee of attendees.value) {
 				if (!attendee.ticket_type || attendee.ticket_type === "") {
-					attendee.ticket_type = newTicketTypes[0].name;
+					attendee.ticket_type = defaultTicketType;
+				}
+			}
+		}
+	},
+	{ immediate: true }
+);
+
+// Initialize booking custom fields with default values
+watch(
+	() => bookingCustomFields.value,
+	(fields) => {
+		if (fields && fields.length > 0) {
+			for (const field of fields) {
+				// Only set default value if field doesn't already have a value
+				if (field.default_value && !bookingCustomFieldsData.value[field.fieldname]) {
+					bookingCustomFieldsData.value[field.fieldname] = field.default_value;
 				}
 			}
 		}
