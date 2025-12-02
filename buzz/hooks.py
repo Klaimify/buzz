@@ -29,6 +29,10 @@ scheduler_events = {"daily": ["buzz.tasks.unpublish_ticket_types_after_last_date
 
 before_tests = "buzz.install.before_tests"
 
+app_include_js = [
+    "https://unpkg.com/html5-qrcode"
+]
+
 
 doc_events = {
 	"User": {
