@@ -1,3 +1,4 @@
+from typing import Optional
 import frappe
 from frappe import _
 from frappe.utils import days_diff, format_date, format_time, today
@@ -153,12 +154,14 @@ def get_event_booking_data(event_route: str) -> dict:
 
 	return data
 
-
 @frappe.whitelist()
-def process_booking(attendees: list[dict], event: str, booking_custom_fields: dict | None = None, redirect_url="/dashboard/bookings/") -> dict:
+def process_booking(attendees: list[dict], coupon: Optional[str] = None, event: str="", booking_custom_fields: dict | None = None) -> dict:
+	coupon = coupon or None
 	booking = frappe.new_doc("Event Booking")
 	booking.event = event
 	booking.user = frappe.session.user
+	booking.coupon = coupon 
+	coupon_doc = frappe.get_doc("Coupon", coupon) if coupon else None
 
 	# Add booking-level custom fields
 	if booking_custom_fields:
@@ -201,21 +204,161 @@ def process_booking(attendees: list[dict], event: str, booking_custom_fields: di
 		}
 
 		booking.append("attendees", attendee_row)
+	print(f"[DEBUG] Booking data prepared: {booking.as_dict()}")
 
 	booking.insert(ignore_permissions=True)
 	frappe.db.commit()
+
+	if coupon:
+		coupon_doc = frappe.get_doc("Coupon", coupon)
+		claimed=int(coupon_doc.claimed_coupon or 0)
+		allowed=int(coupon_doc.coupons_granted or 0)  # corrected field
+		if claimed>= allowed:
+			print(f"[DEBUG] Coupon {claimed} has{allowed} already been fully claimed.")
+			frappe.throw(f"Coupon {coupon} has already been fully claimed.")
+		elif allowed >0 and claimed < allowed:
+			coupon_doc.claimed_coupon += 1
+			coupon_doc.save(ignore_permissions=True)
+			frappe.db.commit()
 
 	if booking.total_amount == 0:
 		booking.flags.ignore_permissions = True
 		booking.submit()
 		return {"booking_name": booking.name}
+	
+	print(f"[DEBUG] Booking created with name: {booking.name}")
 
 	return {
 		"payment_link": get_payment_link_for_booking(
-			booking.name, redirect_to=f"{redirect_url}?booking_id={booking.name}&success=true"
+			booking.name, redirect_to=f"/dashboard/bookings/{booking.name}?success=true"
 		)
 	}
 
+@frappe.whitelist()
+def create_booking(
+    attendees: list[dict],
+    event: str = "",
+    booking_custom_fields: dict | None = None,
+    booking_name: str = None
+):
+    """Create or update a booking safely for production."""
+
+    try:
+        # if not frappe.db.exists("Event", event):
+        #     frappe.throw("Invalid event.")
+        if booking_name and frappe.db.exists("Event Booking", booking_name):
+            booking = frappe.get_doc("Event Booking", booking_name)
+
+            # # Permission check
+            # if booking.user != frappe.session.user:
+            #     frappe.throw("You are not allowed to modify this booking.")
+
+            is_update = True
+
+            # Reset child tables
+            booking.attendees = []
+            booking.additional_fields = []
+
+        else:
+            booking = frappe.new_doc("Event Booking")
+            booking.user = frappe.session.user
+            is_update = False
+
+        booking.event = event
+        booking.coupon = None
+
+        # ------------------------
+        # 2️⃣ Validate & Add Custom Booking Fields
+        # ------------------------
+        if booking_custom_fields:
+            field_defs = frappe.db.get_all(
+                "Buzz Custom Field",
+                filters={"event": event, "enabled": 1, "applied_to": "Booking"},
+                fields=["fieldname", "label", "fieldtype"],
+            )
+            custom_map = {f["fieldname"]: f for f in field_defs}
+
+            for fieldname, value in booking_custom_fields.items():
+                if value and fieldname in custom_map:
+                    field = custom_map[fieldname]
+                    booking.append("additional_fields", {
+                        "fieldname": fieldname,
+                        "value": str(value),
+                        "label": field["label"],
+                        "fieldtype": field["fieldtype"],
+                    })
+
+        # ------------------------
+        # 3️⃣ Validate & Add Attendees
+        # ------------------------
+        for att in attendees:
+            if not att.get("full_name") or not att.get("email"):
+                frappe.throw("Attendee name and email are required.")
+
+            attendee_row = {
+                "full_name": att.get("full_name"),
+                "email": att.get("email"),
+                "ticket_type": att.get("ticket_type"),
+                "add_ons": None,
+                "custom_fields": att.get("custom_fields") or None,
+            }
+            booking.append("attendees", attendee_row)
+
+        # ------------------------
+        # 4️⃣ Commit (insert or update)
+        # ------------------------
+        if is_update:
+            booking.save(ignore_permissions=True)
+        else:
+            booking.insert(ignore_permissions=True)
+
+        frappe.db.commit()
+
+        return {
+            "status": "success",
+            "mode": "updated" if is_update else "created",
+            "booking_name": booking.name,
+            "message": "Booking updated." if is_update else "Booking created.",
+        }
+
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.throw(f"Booking failed: {e}")
+
+
+@frappe.whitelist()
+def finalize_booking(booking_name: str, coupon: str | None = None, redirect_url:str = "/events"):
+    """Finalize the booking: apply coupon, update totals, generate payment link."""
+    booking = frappe.get_doc("Event Booking", booking_name)
+
+    if coupon:
+        coupon_doc = frappe.get_doc("Coupon", coupon)
+
+        claimed = int(coupon_doc.claimed_coupon or 0)
+        allowed = int(coupon_doc.coupons_granted or 0)
+
+        if allowed and claimed >= allowed:
+            frappe.throw(f"Coupon {coupon} has already been fully claimed.")
+
+        # Mark as applied
+        booking.coupon = coupon
+
+        # Increment coupon usage
+        coupon_doc.claimed_coupon = claimed + 1
+        coupon_doc.save(ignore_permissions=True)
+    booking.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    # ---- Create Payment Link ----
+    payment_link = get_payment_link_for_booking(
+        booking.name,
+        redirect_to=f"{redirect_url}?booking_id={booking.name}&success=true", 
+    )
+
+    return {
+        "booking_name": booking.name,
+        "payment_link": payment_link,
+    }
 
 def create_add_on_doc(attendee_name: str, add_ons: list[dict]):
 	"""Create a new Attendee Ticket Add-on document."""

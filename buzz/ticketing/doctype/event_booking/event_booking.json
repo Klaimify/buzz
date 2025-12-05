@@ -16,9 +16,11 @@
   "net_amount",
   "tax_percentage",
   "tax_amount",
+  "coupon",
   "column_break_naeh",
   "total_amount",
   "currency",
+  "discount",
   "section_break_sdfp",
   "amended_from"
  ],
@@ -123,6 +125,17 @@
    "fieldtype": "Table",
    "label": "Additional Fields",
    "options": "Additional Field"
+  },
+  {
+   "fieldname": "coupon",
+   "fieldtype": "Link",
+   "label": "Coupon",
+   "options": "Coupon"
+  },
+  {
+   "fieldname": "discount",
+   "fieldtype": "Data",
+   "label": "Discount"
   }
  ],
  "grid_page_length": 50,
@@ -138,7 +151,7 @@
    "link_fieldname": "reference_docname"
   }
  ],
- "modified": "2025-11-01 11:38:55.175532",
+ "modified": "2025-12-03 16:51:48.479457",
  "modified_by": "Administrator",
  "module": "Ticketing",
  "name": "Event Booking",

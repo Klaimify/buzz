@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-03 10:54:25.036732",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "coupon_code_section",
+  "coupon_code",
+  "valid_from",
+  "valid_to",
+  "discount_type",
+  "discount_amt",
+  "coupons_granted",
+  "claimed_coupon",
+  "event"
+ ],
+ "fields": [
+  {
+   "fieldname": "coupon_code_section",
+   "fieldtype": "Section Break",
+   "label": "coupon code"
+  },
+  {
+   "fieldname": "coupon_code",
+   "fieldtype": "Data",
+   "label": "Coupon Code"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "label": "Valid From"
+  },
+  {
+   "fieldname": "valid_to",
+   "fieldtype": "Date",
+   "label": "valid To"
+  },
+  {
+   "fieldname": "discount_type",
+   "fieldtype": "Select",
+   "label": "Discount Type",
+   "options": "Amount\nPercentage"
+  },
+  {
+   "fieldname": "discount_amt",
+   "fieldtype": "Float",
+   "label": "Discount Amt"
+  },
+  {
+   "fieldname": "claimed_coupon",
+   "fieldtype": "Int",
+   "label": "Claimed Coupon"
+  },
+  {
+   "fieldname": "coupons_granted",
+   "fieldtype": "Int",
+   "label": "No of Person allowed"
+  },
+  {
+   "fieldname": "event",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Event",
+   "options": "Buzz Event",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-03 22:21:40.214367",
+ "modified_by": "Administrator",
+ "module": "Buzz",
+ "name": "Coupon",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

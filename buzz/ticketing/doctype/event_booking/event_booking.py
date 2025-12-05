@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from buzz.payments import mark_payment_as_received
 
 
+
 class EventBooking(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -16,15 +17,16 @@ class EventBooking(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from buzz.ticketing.doctype.additional_field.additional_field import AdditionalField
 		from buzz.ticketing.doctype.event_booking_attendee.event_booking_attendee import EventBookingAttendee
+		from frappe.types import DF
 
 		additional_fields: DF.Table[AdditionalField]
 		amended_from: DF.Link | None
 		attendees: DF.Table[EventBookingAttendee]
+		coupon: DF.Link | None
 		currency: DF.Link
+		discount: DF.Data | None
 		event: DF.Link
 		net_amount: DF.Currency
 		tax_amount: DF.Currency
@@ -34,11 +36,21 @@ class EventBooking(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		has_ticket = False
+		for attendee in self.attendees:
+			if attendee.ticket_type:
+				has_ticket = True
+				break
+		if not has_ticket:
+			return
 		self.validate_ticket_availability()
 		self.fetch_amounts_from_ticket_types()
 		self.set_currency()
 		self.set_total()
+		if self.coupon:
+			self.apply_discount_coupon()
 		self.apply_taxes_if_applicable()
+		
 
 	def set_currency(self):
 		self.currency = self.attendees[0].currency
@@ -61,8 +73,19 @@ class EventBooking(Document):
 		to_apply_gst = event_settings.apply_gst_on_bookings
 		if to_apply_gst:
 			self.tax_percentage = event_settings.gst_percentage or 18
-			self.tax_amount = self.net_amount * (self.tax_percentage / 100)
+			self.tax_amount = self.total_amount * (self.tax_percentage / 100)
 			self.total_amount += self.tax_amount
+
+	def apply_discount_coupon(self):
+		coupon=frappe.get_doc("Coupon", self.coupon)
+		if not coupon:
+			frappe.throw(_("Invalid coupon code."))
+		if coupon.discount_type=="Amount":
+			discount_amount = coupon.discount_amt
+		elif coupon.discount_type=="Percentage":
+			discount_amount = (coupon.discount_amt / 100) * self.total_amount
+		self.total_amount -= discount_amount
+		self.discount = discount_amount
 
 	def validate_ticket_availability(self):
 		num_tickets_by_type = {}

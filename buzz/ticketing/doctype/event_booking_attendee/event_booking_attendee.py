@@ -25,7 +25,7 @@ class EventBookingAttendee(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		ticket_type: DF.Link
+		ticket_type: DF.Link | None
 	# end: auto-generated types
 
 	def get_add_on_total(self):
