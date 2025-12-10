@@ -15,8 +15,9 @@ def get_payment_link_for_booking(booking_id: str, redirect_to: str = "/events") 
 	booking_doc = frappe.get_cached_doc("Event Booking", booking_id)
 	event_title = frappe.get_cached_value("Buzz Event", booking_doc.event, "title")
 	payment_gateway = get_payment_gateway_for_event(booking_doc.event)
+	print(f"[DEBUG] Payment gateway for event '{booking_doc}': {payment_gateway}")
 	return get_payment_link(
-		"Event Booking",
+		"Event Booking", 
 		booking_id,
 		booking_doc.total_amount,
 		booking_doc.currency,
@@ -66,7 +67,7 @@ def get_payment_link(
 		"title": title or f"Payment for {reference_doctype}: {reference_docname}",
 		"description": f"{user_full_name}'s payment for {reference_doctype} (#{reference_docname})",
 		"reference_doctype": reference_doctype,
-		"reference_docname": reference_docname,
+		"reference_docname": reference_docname, 
 		"payer_email": frappe.session.user,
 		"payer_name": user_full_name,
 		"currency": currency,
@@ -129,7 +130,7 @@ def mark_payment_as_received(reference_doctype: str, reference_docname: str):
 		if payment_gateway == "Razorpay":
 			payment_id = "razorpay_payment_id"
 
-		if payment_gateway == "Paymob":
+		elif payment_gateway == "Paymob":
 			payment_id = "paymob_payment_id"
 
 		elif "Stripe" in payment_gateway:
