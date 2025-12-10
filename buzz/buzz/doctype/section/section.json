@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:section_key",
  "creation": "2025-12-09 11:12:30.411249",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -21,7 +22,8 @@
   {
    "fieldname": "section_key",
    "fieldtype": "Data",
-   "label": "Section Key"
+   "label": "Section Key",
+   "unique": 1
   },
   {
    "fieldname": "items",
@@ -49,10 +51,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-09 20:43:10.993775",
+ "modified": "2025-12-10 17:52:35.733606",
  "modified_by": "Administrator",
  "module": "Buzz",
  "name": "Section",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
