@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-09 11:24:10.652184",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "field_key",
+  "field_type",
+  "field_value",
+  "image",
+  "icon"
+ ],
+ "fields": [
+  {
+   "fieldname": "field_key",
+   "fieldtype": "Data",
+   "label": "Field Key"
+  },
+  {
+   "fieldname": "field_type",
+   "fieldtype": "Select",
+   "label": "Field Type",
+   "options": "text\nimage"
+  },
+  {
+   "fieldname": "field_value",
+   "fieldtype": "Small Text",
+   "label": "Field Value"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
+  },
+  {
+   "fieldname": "icon",
+   "fieldtype": "Data",
+   "label": "Icon"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-09 20:44:10.075540",
+ "modified_by": "Administrator",
+ "module": "Buzz",
+ "name": "website Sub-Section",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
