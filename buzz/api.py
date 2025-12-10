@@ -519,7 +519,7 @@ def get_booking_details(booking_id: str) -> dict:
 			"attendee_name",
 			"attendee_email",
 			"ticket_type.title as ticket_type",
-			"ticket_type",
+			
 			"qr_code",
 			"event",
 			"docstatus",
