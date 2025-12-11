@@ -757,6 +757,10 @@ def validate_ticket_for_checkin(ticket_id: str) -> dict:
 		frappe.throw(_("Ticket not found"))
 
 	ticket_doc = frappe.get_cached_doc("Event Ticket", ticket_id)
+
+	if ticket_doc.docstatus == 2:
+		frappe.throw(_("This ticket has been cancelled and cannot be checked in"))
+
 	event_doc = frappe.get_cached_doc("Buzz Event", ticket_doc.event)
 	ticket_type_doc = (
 		frappe.get_cached_doc("Event Ticket Type", ticket_doc.ticket_type) if ticket_doc.ticket_type else None
@@ -807,7 +811,27 @@ def validate_ticket_for_checkin(ticket_id: str) -> dict:
 			"booking_id": ticket_doc.booking,
 			"add_ons": add_ons,
 		},
+		"payment_details": get_payment_details_for_ticket(ticket_id),
 	}
+
+
+def get_payment_details_for_ticket(ticket_id: str) -> dict | None:
+	booking = frappe.get_cached_doc(
+		"Event Booking", frappe.get_cached_value("Event Ticket", ticket_id, "booking")
+	)
+	payments = frappe.db.get_all(
+		"Event Payment",
+		filters={
+			"reference_doctype": "Event Booking",
+			"reference_docname": booking.name,
+			"payment_received": 1,
+		},
+		fields=["name", "amount", "currency"],
+		limit=1,
+	)
+
+	if payments:
+		return payments[0]
 
 
 @frappe.whitelist()
@@ -859,3 +883,13 @@ def update_user_language(language_code: str):
 		frappe.throw(_("Invalid language"))
 
 	frappe.db.set_value("User", frappe.session.user, "language", language_code)
+
+
+@frappe.whitelist(allow_guest=True)
+def get_translations():
+	if frappe.session.user != "Guest":
+		language = frappe.db.get_value("User", frappe.session.user, "language")
+	else:
+		language = frappe.db.get_single_value("System Settings", "language")
+
+	return get_all_translations(language)
