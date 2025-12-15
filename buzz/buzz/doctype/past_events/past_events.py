@@ -15,8 +15,10 @@ class PastEvents(Document):
 		from frappe.types import DF
 
 		description: DF.Text | None
+		event_date: DF.Date | None
 		event_image: DF.AttachImage | None
 		event_title: DF.Data | None
+		location: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

@@ -8,7 +8,9 @@
  "field_order": [
   "event_image",
   "event_title",
-  "description"
+  "description",
+  "event_date",
+  "location"
  ],
  "fields": [
   {
@@ -25,13 +27,23 @@
    "fieldname": "description",
    "fieldtype": "Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "event_date",
+   "fieldtype": "Date",
+   "label": "Event Date"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-09 11:58:37.539887",
+ "modified": "2025-12-13 16:40:01.863355",
  "modified_by": "Administrator",
  "module": "Buzz",
  "name": "Past Events",
