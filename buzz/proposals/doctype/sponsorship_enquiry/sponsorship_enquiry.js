@@ -2,6 +2,27 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Sponsorship Enquiry", {
+	get_email_recipients(frm, fieldname) {
+		const owner = frm.doc.owner || "";
+		return fieldname === "recipients" && owner.includes("@") ? [owner] : [];
+	},
+
+	setup(frm) {
+		frm.set_query("tier", (doc) => {
+			return {
+				filters: {
+					event: doc.event,
+				},
+			};
+		});
+	},
+
+	event(frm) {
+		if (frm.doc.tier) {
+			frm.set_value("tier", null);
+		}
+	},
+
 	refresh(frm) {
 		if (!frm.doc.__islocal) {
 			if (frm.doc.status === "Approval Pending") {

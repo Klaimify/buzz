@@ -1,42 +1,47 @@
 <template>
 	<Dialog v-model="isOpen">
-		<template #body-title>
-			<h3 class="text-xl font-semibold text-ink-gray-9">{{ __("Transfer Ticket") }}</h3>
+		<template #title>
+			<h3 class="text-2xl-semibold text-ink-gray-9">{{ __("Transfer Ticket") }}</h3>
 		</template>
-		<template #body-content>
-			<div class="space-y-4">
-				<p class="text-ink-gray-7">
-					{{
-						__(
-							"Transfer this ticket to a new attendee. The new attendee will receive the updated ticket information."
-						)
-					}}
-				</p>
+		<div class="space-y-4">
+			<p class="text-ink-gray-7">
+				{{
+					__(
+						"Transfer this ticket to a new attendee. The new attendee will receive the updated ticket information."
+					)
+				}}
+			</p>
 
-				<FormControl
-					type="text"
-					:label="__('New Attendee Name')"
-					:placeholder="__('Enter full name')"
-					v-model="transferForm.name"
-					:required="true"
-				/>
+			<FormControl
+				type="text"
+				:label="__('First Name')"
+				:placeholder="__('Enter first name')"
+				v-model="transferForm.first_name"
+				:required="true"
+			/>
 
-				<FormControl
-					type="email"
-					:label="__('New Attendee Email')"
-					:placeholder="__('Enter email address')"
-					v-model="transferForm.email"
-					:required="true"
-				/>
-			</div>
-		</template>
+			<FormControl
+				type="text"
+				:label="__('Last Name')"
+				:placeholder="__('Enter last name')"
+				v-model="transferForm.last_name"
+			/>
+
+			<FormControl
+				type="email"
+				:label="__('New Attendee Email')"
+				:placeholder="__('Enter email address')"
+				v-model="transferForm.email"
+				:required="true"
+			/>
+		</div>
 		<template #actions="{ close }">
 			<div class="flex gap-2">
 				<Button
 					variant="solid"
 					@click="handleTransferTicket"
 					:loading="transferResource.loading"
-					:disabled="!transferForm.name || !transferForm.email"
+					:disabled="!transferForm.first_name || !transferForm.email"
 				>
 					{{ __("Transfer Ticket") }}
 				</Button>
@@ -46,9 +51,10 @@
 	</Dialog>
 </template>
 
-<script setup>
-import { ref, watch, computed } from "vue";
-import { createResource, Dialog, FormControl, Button, toast } from "frappe-ui";
+<script setup lang="ts">
+import type { FrappeError } from "@/types";
+import { Button, Dialog, FormControl, createResource, toast } from "frappe-ui";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
 	modelValue: {
@@ -69,7 +75,8 @@ const isOpen = computed({
 });
 
 const transferForm = ref({
-	name: "",
+	first_name: "",
+	last_name: "",
 	email: "",
 });
 
@@ -82,27 +89,29 @@ const transferResource = createResource({
 		resetTransferForm();
 		emit("success");
 	},
-	onError: (error) => {
+	onError: (error: FrappeError) => {
 		toast.error(`${__("Failed to transfer ticket")}: ${error.message}`);
 	},
 });
 
 const handleTransferTicket = () => {
-	if (!props.ticket || !transferForm.value.name || !transferForm.value.email) {
+	if (!props.ticket || !transferForm.value.first_name || !transferForm.value.email) {
 		toast.error(__("Please fill in all required fields"));
 		return;
 	}
 
 	transferResource.submit({
 		ticket_id: props.ticket.name,
-		new_name: transferForm.value.name,
+		new_first_name: transferForm.value.first_name,
+		new_last_name: transferForm.value.last_name || "",
 		new_email: transferForm.value.email,
 	});
 };
 
 const resetTransferForm = () => {
 	transferForm.value = {
-		name: "",
+		first_name: "",
+		last_name: "",
 		email: "",
 	};
 };

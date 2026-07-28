@@ -8,7 +8,7 @@
 			v-else-if="tickets.error"
 			class="bg-surface-red-1 border border-outline-red-1 rounded-lg p-4"
 		>
-			<p class="text-ink-red-3">
+			<p class="text-ink-red-6">
 				{{ __("Error loading tickets") }}: {{ tickets.error.message }}
 			</p>
 		</div>
@@ -20,7 +20,7 @@
 			row-key="name"
 			:options="{
 				selectable: false,
-				getRowRoute: (row) => ({
+				getRowRoute: (row: Record<string, any>) => ({
 					name: 'ticket-details',
 					params: { ticketId: row.name },
 				}),
@@ -37,10 +37,10 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ListView, useList } from "frappe-ui";
-import { session } from "../data/session";
 import { dayjsLocal } from "frappe-ui";
+import { session } from "../data/session";
 
 const columns = [
 	{ label: __("Attendee Name"), key: "attendee_name" },
@@ -67,12 +67,10 @@ const tickets = useList({
 		docstatus: ["!=", 0],
 	},
 	orderBy: "creation desc",
-	realtime: true,
-	auto: true,
 	cacheKey: "tickets-list",
 	onError: console.error,
-	transform(data) {
-		return data.map((ticket) => ({
+	transform(data: any[]) {
+		return data.map((ticket: Record<string, any>) => ({
 			...ticket,
 			start_date: dayjsLocal(ticket.start_date).format("MMM DD, YYYY"),
 			ticket_type_display: ticket.ticket_type_title || ticket.ticket_type,

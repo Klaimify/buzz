@@ -4,18 +4,18 @@
 		<!-- Banner Image -->
 		<div
 			v-if="eventDetails.banner_image"
-			class="relative w-full h-48 md:h-64 lg:h-80 rounded-lg overflow-hidden mb-6"
+			class="relative w-full rounded-lg overflow-hidden mb-6"
 		>
 			<img
 				:src="eventDetails.banner_image"
 				:alt="eventDetails.title"
-				class="w-full h-full object-cover contrast-100 brightness-100"
+				class="w-full h-auto max-h-80 object-cover contrast-100 brightness-100"
 			/>
 		</div>
 
 		<!-- Event Info without banner -->
 		<div v-else class="mb-6">
-			<h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-ink-gray-9 mb-4">
+			<h1 class="text-3xl-bold md:text-4xl lg:text-5xl text-ink-gray-9 mb-4">
 				{{ __(eventDetails.title) }}
 			</h1>
 		</div>
@@ -45,7 +45,9 @@
 					<div>
 						<p class="font-medium text-ink-gray-8">
 							{{ formatEventTime(eventDetails.start_time, eventDetails.end_time) }}
-							({{ eventDetails.time_zone }})
+							<span v-if="eventDetails.time_zone_label"
+								>({{ eventDetails.time_zone_label }})</span
+							>
 						</p>
 					</div>
 				</div>
@@ -88,11 +90,11 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { dayjs, dayjsLocal } from "frappe-ui";
 import LucideCalendar from "~icons/lucide/calendar";
 import LucideClock from "~icons/lucide/clock";
 import LucideMapPin from "~icons/lucide/map-pin";
-import { dayjsLocal, dayjs } from "frappe-ui/src/utils/dayjs";
 
 const props = defineProps({
 	eventDetails: {
@@ -102,7 +104,7 @@ const props = defineProps({
 });
 
 // --- UTILITY FUNCTIONS ---
-const formatEventDates = (startDate, endDate) => {
+const formatEventDates = (startDate: string, endDate: string) => {
 	if (!startDate) return "";
 
 	const start = dayjsLocal(startDate);
@@ -118,7 +120,7 @@ const formatEventDates = (startDate, endDate) => {
 	return `${startFormatted} - ${endFormatted}`;
 };
 
-const formatEventTime = (startTime, endTime) => {
+const formatEventTime = (startTime: string, endTime: string) => {
 	if (!startTime) return "";
 
 	// Create a date object for today with the given time

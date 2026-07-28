@@ -2,8 +2,8 @@
 	<div class="mb-6 size-full">
 		<!-- Header - only show when there are events -->
 		<h2
-			v-if="eventsResource.data?.length > 0"
-			class="text-lg font-semibold mb-4 text-gray-900 dark:text-white"
+			v-if="(eventsResource.data?.length ?? 0) > 0"
+			class="text-lg-semibold mb-4 text-gray-900 dark:text-white"
 		>
 			{{ __("Select Event") }}
 		</h2>
@@ -47,8 +47,9 @@
 	</div>
 </template>
 
-<script setup>
-import { createListResource, dayjsLocal, ListView, Spinner } from "frappe-ui";
+<script setup lang="ts">
+import type { BuzzEvent } from "@/types";
+import { ListView, Spinner, createListResource, dayjsLocal } from "frappe-ui";
 
 defineProps({
 	selectedEvent: {
@@ -65,7 +66,7 @@ const columns = [
 	{ label: __("Ends At"), key: "ends_at" },
 ];
 
-const formatTimestamp = (date, time) => {
+const formatTimestamp = (date?: string, time?: string) => {
 	let formattedDate = "";
 	let formattedTime = "";
 
@@ -95,8 +96,8 @@ const eventsResource = createListResource({
 		end_date: [">=", dayjsLocal().format("YYYY-MM-DD")],
 	},
 	auto: true,
-	transform(data) {
-		return data.map((event) => ({
+	transform(data: BuzzEvent[]) {
+		return data.map((event: BuzzEvent) => ({
 			...event,
 			starts_at: formatTimestamp(event.start_date, event.start_time),
 			ends_at: formatTimestamp(event.end_date, event.end_time),
@@ -104,7 +105,7 @@ const eventsResource = createListResource({
 	},
 });
 
-const handleEventSelect = (event) => {
+const handleEventSelect = (event: BuzzEvent) => {
 	emit("select", event);
 };
 </script>

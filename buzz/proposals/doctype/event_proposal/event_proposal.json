@@ -7,10 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "category",
-  "free_webinar",
-  "medium",
+  "free_event",
   "column_break_bixo",
+  "category",
+  "medium",
   "status",
   "naming_series",
   "section_break_psfj",
@@ -21,14 +21,19 @@
   "end_time",
   "section_break_zajc",
   "short_description",
-  "column_break_yxbj",
   "about",
   "host_tab",
   "host",
   "section_break_xzvg",
   "host_company",
-  "additional_notes",
+  "column_break_kjra",
   "host_company_logo",
+  "column_break_rryk",
+  "event_banner",
+  "section_break_wtpz",
+  "about_the_company",
+  "section_break_ehhk",
+  "additional_notes",
   "section_break_kray",
   "amended_from"
  ],
@@ -70,7 +75,7 @@
   {
    "fieldname": "host_company",
    "fieldtype": "Data",
-   "label": "Host Company"
+   "label": "Company Name"
   },
   {
    "fieldname": "additional_notes",
@@ -89,9 +94,10 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "This logo will be used across the site",
    "fieldname": "host_company_logo",
    "fieldtype": "Attach Image",
-   "label": "Host Company Logo"
+   "label": "Company Logo"
   },
   {
    "fieldname": "section_break_psfj",
@@ -115,27 +121,25 @@
   {
    "fieldname": "start_time",
    "fieldtype": "Time",
-   "label": "Start Time"
+   "label": "Start Time",
+   "reqd": 1
   },
   {
    "fieldname": "end_time",
    "fieldtype": "Time",
-   "label": "End Time"
+   "label": "End Time",
+   "reqd": 1
   },
   {
    "fieldname": "about",
    "fieldtype": "Text Editor",
-   "label": "About the event",
+   "label": "About the Event",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break_yxbj",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "short_description",
    "fieldtype": "Small Text",
-   "label": "Short Description"
+   "label": "Short Description of Event"
   },
   {
    "default": "Online",
@@ -147,10 +151,10 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.event_category==\"Webinars\"",
-   "fieldname": "free_webinar",
+   "depends_on": "eval:[\"Webinars\",\"Zoom Meeting\"].includes(doc.event_category)",
+   "fieldname": "free_event",
    "fieldtype": "Check",
-   "label": "Free Webinar?"
+   "label": "Free Event?"
   },
   {
    "fieldname": "amended_from",
@@ -172,13 +176,39 @@
   {
    "fieldname": "section_break_xzvg",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_kjra",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "event_banner",
+   "fieldtype": "Attach Image",
+   "label": "Event Banner"
+  },
+  {
+   "fieldname": "section_break_ehhk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_wtpz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "about_the_company",
+   "fieldtype": "Small Text",
+   "label": "About the Company"
+  },
+  {
+   "fieldname": "column_break_rryk",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-11 11:36:40.618179",
+ "modified": "2026-06-20 17:30:09.585422",
  "modified_by": "Administrator",
  "module": "Proposals",
  "name": "Event Proposal",

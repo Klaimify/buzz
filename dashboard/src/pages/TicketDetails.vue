@@ -10,7 +10,7 @@
 	<div v-else-if="ticketDetails.data">
 		<div class="flex justify-between items-start mb-6">
 			<div>
-				<h2 class="text-ink-gray-9 font-semibold text-lg mb-1">
+				<h2 class="text-ink-gray-9 text-lg-semibold mb-1">
 					{{ __("Ticket Details") }}
 					<span class="text-ink-gray-5 font-mono">(#{{ ticketId }})</span>
 				</h2>
@@ -49,9 +49,9 @@
 			class="mb-4 bg-surface-amber-1 border border-outline-amber-1 rounded-lg p-4"
 		>
 			<div class="flex items-center">
-				<LucideTriangleAlert class="w-5 h-5 text-ink-amber-2 mr-3" />
+				<LucideTriangleAlert class="w-5 h-5 text-ink-amber-5 mr-3" />
 				<div>
-					<p class="text-ink-amber-3 text-sm">
+					<p class="text-ink-amber-6 text-sm">
 						<strong>{{
 							__("Add-on preference changes are no longer available")
 						}}</strong>
@@ -63,28 +63,28 @@
 
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 			<!-- Ticket Information -->
-			<div class="bg-surface-cards border border-outline-gray-1 rounded-lg p-6">
-				<h3 class="text-ink-gray-8 font-semibold text-lg mb-4">
+			<div class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6">
+				<h3 class="text-ink-gray-8 text-lg-semibold mb-4">
 					{{ __("Ticket Information") }}
 				</h3>
 
 				<div class="space-y-3">
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Attendee Name")
 						}}</label>
 						<p class="text-ink-gray-9">{{ ticketDetails.data.doc.attendee_name }}</p>
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Attendee Email")
 						}}</label>
 						<p class="text-ink-gray-9">{{ ticketDetails.data.doc.attendee_email }}</p>
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Event")
 						}}</label>
 						<p class="text-ink-gray-9">{{ ticketDetails.data.doc.event_title }}</p>
@@ -97,7 +97,7 @@
 							)
 						"
 					>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Ticket Type")
 						}}</label>
 						<p class="text-ink-gray-9">
@@ -106,7 +106,7 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Status")
 						}}</label>
 						<Badge
@@ -123,28 +123,27 @@
 			<!-- QR Code Display -->
 			<div
 				v-if="ticketDetails.data.doc.qr_code"
-				class="bg-surface-cards border border-outline-gray-1 rounded-lg p-6"
+				class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6"
 			>
-				<h3 class="text-ink-gray-8 font-semibold text-lg mb-4">{{ __("QR Code") }}</h3>
+				<h3 class="text-ink-gray-8 text-lg-semibold mb-4">{{ __("QR Code") }}</h3>
 				<div class="flex justify-center">
 					<img
 						:src="ticketDetails.data.doc.qr_code"
 						:alt="__('Ticket QR Code')"
-						class="max-w-48 h-auto border border-outline-gray-1 rounded contrast-100 brightness-100"
+						:title="__('Click to enlarge')"
+						class="max-w-48 h-auto border border-outline-gray-1 rounded contrast-100 brightness-100 cursor-pointer hover:opacity-80 transition-opacity"
+						@click="showQRExpanded = true"
 					/>
 				</div>
-				<p class="text-sm text-ink-gray-6 text-center mt-2">
-					{{ __("Present this QR code at the event entrance") }}
-				</p>
 			</div>
 
 			<!-- Add-ons Information -->
 			<div
 				v-if="ticketDetails.data.add_ons && ticketDetails.data.add_ons.length > 0"
-				class="bg-surface-cards border border-outline-gray-1 rounded-lg p-6"
+				class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6"
 			>
 				<div class="flex justify-between items-center mb-4">
-					<h3 class="text-ink-gray-8 font-semibold text-lg">{{ __("Add-ons") }}</h3>
+					<h3 class="text-ink-gray-8 text-lg-semibold">{{ __("Add-ons") }}</h3>
 					<Button
 						v-if="hasCustomizableAddOns && canChangeAddOns"
 						variant="outline"
@@ -177,14 +176,14 @@
 			</div>
 
 			<!-- Event Information -->
-			<div class="bg-surface-cards border border-outline-gray-1 rounded-lg p-6">
-				<h3 class="text-ink-gray-8 font-semibold text-lg mb-4">
+			<div class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6">
+				<h3 class="text-ink-gray-8 text-lg-semibold mb-4">
 					{{ __("Event Information") }}
 				</h3>
 
 				<div class="space-y-3">
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Start Date")
 						}}</label>
 						<p class="text-ink-gray-9">
@@ -193,7 +192,7 @@
 					</div>
 
 					<div v-if="ticketDetails.data.doc.formatted_end_date">
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("End Date")
 						}}</label>
 						<p class="text-ink-gray-9">
@@ -202,14 +201,14 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Venue")
 						}}</label>
 						<p class="text-ink-gray-9">{{ ticketDetails.data.doc.venue }}</p>
 					</div>
 
 					<div v-if="ticketDetails.data.doc.description">
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Description")
 						}}</label>
 						<p class="text-ink-gray-9">{{ ticketDetails.data.doc.description }}</p>
@@ -217,18 +216,43 @@
 				</div>
 			</div>
 
+			<!-- Zoom Webinar Access (only shown if webinar is linked) -->
+			<div
+				v-if="ticketDetails.data.zoom_join_url"
+				class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6"
+			>
+				<h3 class="text-ink-gray-8 text-lg-semibold mb-4">
+					{{ __("Webinar Access") }}
+				</h3>
+
+				<div class="space-y-3">
+					<p class="text-sm text-ink-gray-6">
+						{{ __("Click the button below to join the webinar on Zoom.") }}
+					</p>
+					<a
+						:href="ticketDetails.data.zoom_join_url"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-2 px-4 py-2 bg-ink-blue-6 text-surface-base rounded-lg hover:bg-blue-700 transition-colors"
+					>
+						<span>{{ __("Join Zoom Webinar") }}</span>
+						<LucideExternalLink class="w-4 h-4" />
+					</a>
+				</div>
+			</div>
+
 			<!-- Booking Information (only shown if user owns the booking) -->
 			<div
 				v-if="ticketDetails.data.booking"
-				class="bg-surface-cards border border-outline-gray-1 rounded-lg p-6"
+				class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6"
 			>
-				<h3 class="text-ink-gray-8 font-semibold text-lg mb-4">
+				<h3 class="text-ink-gray-8 text-lg-semibold mb-4">
 					{{ __("Booking Information") }}
 				</h3>
 
 				<div class="space-y-3">
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Booking ID")
 						}}</label>
 						<RouterLink
@@ -243,7 +267,7 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Booking Status")
 						}}</label>
 						<Badge
@@ -260,7 +284,7 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Total Amount")
 						}}</label>
 						<p class="text-ink-gray-9">
@@ -269,7 +293,7 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-ink-gray-6">{{
+						<label class="block text-sm-medium text-ink-gray-6">{{
 							__("Booked On")
 						}}</label>
 						<p class="text-ink-gray-9">
@@ -293,20 +317,30 @@
 			:ticket="{ ...ticketDetails.data.doc, add_ons: ticketDetails.data.add_ons }"
 			@success="onAddOnPreferenceSuccess"
 		/>
+
+		<!-- QR Code Expand Dialog -->
+		<QRCodeExpandDialog
+			v-model="showQRExpanded"
+			:qrCodeSrc="ticketDetails.data.doc.qr_code"
+			:altText="__('Ticket QR Code')"
+		/>
 	</div>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-import { createResource, Spinner, Button, Badge } from "frappe-ui";
-import { formatCurrency } from "../utils/currency";
+<script setup lang="ts">
+import type { TicketAddOn } from "@/types";
+import { formatCurrency } from "@/utils/currency";
+import { Badge, Button, Spinner, createResource } from "frappe-ui";
 import { dayjsLocal } from "frappe-ui";
-import TicketTransferDialog from "../components/TicketTransferDialog.vue";
-import AddOnPreferenceDialog from "../components/AddOnPreferenceDialog.vue";
+import { computed, ref } from "vue";
 import LucideDownload from "~icons/lucide/download";
-import LucideUserPlus from "~icons/lucide/user-plus";
 import LucideEdit from "~icons/lucide/edit";
+import LucideExternalLink from "~icons/lucide/external-link";
 import LucideTriangleAlert from "~icons/lucide/triangle-alert";
+import LucideUserPlus from "~icons/lucide/user-plus";
+import AddOnPreferenceDialog from "../components/AddOnPreferenceDialog.vue";
+import QRCodeExpandDialog from "../components/QRCodeExpandDialog.vue";
+import TicketTransferDialog from "../components/TicketTransferDialog.vue";
 import BackButton from "../components/common/BackButton.vue";
 
 const props = defineProps({
@@ -317,7 +351,7 @@ const props = defineProps({
 });
 
 // Helper function to format date and time together
-const formatEventDateTime = (date, time) => {
+const formatEventDateTime = (date: string, time: string) => {
 	if (!date) return "";
 
 	// Create a date object from the date string
@@ -338,12 +372,13 @@ const formatEventDateTime = (date, time) => {
 const downloadingTicket = ref(false);
 const showTransferDialog = ref(false);
 const showAddOnPreferenceDialog = ref(false);
+const showQRExpanded = ref(false);
 
 const ticketDetails = createResource({
 	url: "buzz.api.get_ticket_details",
 	params: { ticket_id: props.ticketId },
 	auto: true,
-	transform(data) {
+	transform(data: any) {
 		if (!data) return null;
 
 		return {
@@ -404,7 +439,7 @@ const hasCustomizableAddOns = computed(() => {
 	}
 
 	console.log("Add-ons data:", ticketDetails.data.add_ons);
-	const hasCustomizable = ticketDetails.data.add_ons.some((addon) => {
+	const hasCustomizable = ticketDetails.data.add_ons.some((addon: TicketAddOn) => {
 		console.log(
 			"Checking addon:",
 			addon,
@@ -425,7 +460,7 @@ const canChangeAddOns = computed(() => {
 	);
 });
 
-const getTicketStatusTheme = (status) => {
+const getTicketStatusTheme = (status: string) => {
 	switch (status) {
 		case "Confirmed":
 		case "Active":

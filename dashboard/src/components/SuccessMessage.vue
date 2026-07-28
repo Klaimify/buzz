@@ -13,16 +13,20 @@
 			class="mb-6 bg-surface-green-1 border border-outline-green-1 rounded-lg p-4"
 		>
 			<div class="flex items-center">
-				<LucideCheckCircle class="w-6 h-6 text-ink-green-2 mr-3" />
+				<LucideCheckCircle class="w-6 h-6 text-ink-green-6 mr-3" />
 				<div>
-					<h3 class="text-ink-green-3 font-semibold">
+					<h3 class="text-ink-green-7 font-semibold">
 						{{ __("Payment Successful! 🎉") }}
 					</h3>
-					<p class="text-ink-green-2">
+					<p class="text-ink-green-6">
 						{{
-							__(
-								"Your booking has been confirmed. Check your email for tickets and details."
-							)
+							isRegistration
+								? __(
+										"Your registration has been confirmed. You will receive an invite shortly."
+								  )
+								: __(
+										"Your booking has been confirmed. Check your email for tickets and details."
+								  )
 						}}
 					</p>
 				</div>
@@ -31,13 +35,17 @@
 	</Transition>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import LucideCheckCircle from "~icons/lucide/check-circle";
 
-defineProps({
-	show: {
-		type: Boolean,
-		default: false,
-	},
-});
+withDefaults(
+	defineProps<{
+		show?: boolean;
+		isRegistration?: boolean;
+	}>(),
+	{
+		show: false,
+		isRegistration: false,
+	}
+);
 </script>

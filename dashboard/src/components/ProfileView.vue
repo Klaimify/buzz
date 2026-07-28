@@ -1,7 +1,7 @@
 <template>
-	<div v-if="profile" class="flex w-full items-center justify-between mb-8">
+	<div v-if="profile" class="flex w-full items-center justify-between mb-3 sm:mb-5">
 		<FileUploader
-			@success="(file) => updateImage(file.file_url)"
+			@success="(file: { file_url: string }) => updateImage(file.file_url)"
 			:validateFile="validateIsImageFile"
 		>
 			<template #default="{ openFileSelector, error: _error }">
@@ -19,14 +19,14 @@
 									? {
 											options: [
 												{
-													icon: 'upload',
+													icon: 'lucide-upload',
 													label: profile.user_image
 														? __('Change image')
 														: __('Upload image'),
 													onClick: openFileSelector,
 												},
 												{
-													icon: 'trash-2',
+													icon: 'lucide-trash-2',
 													label: __('Remove image'),
 													onClick: () => updateImage(),
 												},
@@ -48,13 +48,13 @@
 						</component>
 					</div>
 					<div class="flex flex-col gap-1">
-						<span class="text-2xl font-semibold text-ink-gray-8">
+						<span class="text-3xl-semibold text-ink-gray-8">
 							{{ profile.full_name }}
 						</span>
 						<span class="text-base text-ink-gray-7">
 							{{ profile.email }}
 						</span>
-						<ErrorMessage :message="__(_error)" />
+						<ErrorMessage :message="__(_error as string)" />
 					</div>
 				</div>
 			</template>
@@ -62,16 +62,26 @@
 	</div>
 </template>
 
-<script setup>
-import LucideCamera from "~icons/lucide/camera";
+<script setup lang="ts">
+import type { FrappeError } from "@/types";
 import { validateIsImageFile } from "@/utils";
+import { Avatar, Dropdown, FileUploader, createResource, toast } from "frappe-ui";
+import { onMounted, ref } from "vue";
+import LucideCamera from "~icons/lucide/camera";
 import { userResource } from "../data/user";
-import { Dropdown, FileUploader, Avatar, createResource, toast } from "frappe-ui";
-import { ref, onMounted } from "vue";
 
-const user = userResource.data || {};
+interface UserProfile {
+	name?: string;
+	full_name?: string;
+	email?: string;
+	user_image?: string;
+	first_name?: string;
+	last_name?: string;
+}
 
-const profile = ref({});
+const user = (userResource.data || {}) as UserProfile;
+
+const profile = ref<UserProfile>({});
 const error = ref("");
 
 const setUser = createResource({
@@ -91,8 +101,8 @@ const setUser = createResource({
 		error.value = "";
 		toast.success(__("Profile updated successfully"));
 	},
-	onError: (err) => {
-		error.value = err.messages[0] || __("Failed to update profile");
+	onError: (err: FrappeError) => {
+		error.value = err.messages?.[0] || __("Failed to update profile");
 	},
 });
 

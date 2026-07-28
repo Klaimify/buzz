@@ -7,7 +7,7 @@
 			row-key="name"
 			:options="{
 				selectable: false,
-				getRowRoute: (row) => ({
+				getRowRoute: (row: Record<string, any>) => ({
 					name: 'booking-details',
 					params: { bookingId: row.name },
 				}),
@@ -17,35 +17,41 @@
 				},
 			}"
 		>
-			<template #cell="{ item, row, column }">
+			<template #cell="{ item, row, column, align }">
 				<Badge
 					v-if="column.key === 'status'"
-					:theme="row.status === 'Confirmed' ? 'green' : 'red'"
+					:theme="
+						row.status === 'Approved' || row.status === 'Confirmed'
+							? 'green'
+							: row.status === 'Approval Pending'
+							? 'orange'
+							: 'red'
+					"
 					variant="subtle"
 					size="sm"
 				>
 					{{ item }}
 				</Badge>
-				<span v-else>{{ item }}</span>
+				<ListRowItem v-else :column="column" :row="row" :item="item" :align="align" />
 			</template>
 		</ListView>
 	</div>
 </template>
 
-<script setup>
-import { ListView, useList, Badge } from "frappe-ui";
-import { session } from "../data/session";
-import { formatCurrency } from "../utils/currency";
+<script setup lang="ts">
+import { formatCurrency } from "@/utils/currency";
+import { pluralize } from "@/utils/pluralize";
+import { Badge, ListRowItem, ListView, useList } from "frappe-ui";
 import { dayjsLocal } from "frappe-ui";
-import { pluralize } from "../utils/pluralize";
+import { session } from "../data/session";
 
 const columns = [
-	{ label: __("Event"), key: "event_title" },
-	{ label: "", key: "ticket_count" },
-	{ label: __("Start Date"), key: "start_date" },
-	{ label: __("Venue"), key: "venue" },
-	{ label: __("Amount Paid"), key: "formatted_amount" },
-	{ label: __("Status"), key: "status" },
+	{ label: __("Event"), key: "event_title", width: "220px" },
+	{ label: "", key: "ticket_count", width: "90px" },
+	{ label: __("Start Date"), key: "start_date", width: "110px" },
+	{ label: __("Venue"), key: "venue", width: "140px" },
+	{ label: __("Amount Paid"), key: "formatted_amount", width: "110px" },
+	{ label: __("Status"), key: "status", width: "120px" },
 ];
 
 const bookings = useList({
@@ -60,22 +66,21 @@ const bookings = useList({
 		"total_amount",
 		"currency",
 		"creation",
+		"status",
 		{ attendees: ["ticket_type"] },
 	],
 	filters: { user: session.user, docstatus: ["!=", "0"] },
 	orderBy: "creation desc",
-	realtime: true,
-	auto: true,
 	cacheKey: "bookings-list",
 	onError: console.error,
-	transform(data) {
-		return data.map((booking) => ({
+	transform(data: any[]) {
+		return data.map((booking: Record<string, any>) => ({
 			...booking,
 			formatted_amount:
 				booking.total_amount !== 0
 					? formatCurrency(booking.total_amount, booking.currency)
 					: __("FREE"),
-			status: booking.docstatus === 1 ? __("Confirmed") : __("Cancelled"),
+			status: booking.status || __("Pending"),
 			start_date: dayjsLocal(booking.start_date).format("MMM DD, YYYY"),
 			ticket_count: pluralize(
 				booking.attendees ? booking.attendees.length : 0,

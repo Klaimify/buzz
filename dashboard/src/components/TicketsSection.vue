@@ -1,7 +1,7 @@
 <template>
-	<div class="bg-surface-cards border border-outline-gray-1 rounded-lg p-6">
+	<div class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6">
 		<div class="flex justify-between items-center mb-4">
-			<h3 class="text-lg font-semibold text-ink-gray-9">{{ __("Your Tickets") }}</h3>
+			<h3 class="text-lg-semibold text-ink-gray-9">{{ __("Your Tickets") }}</h3>
 
 			<!-- Request Cancellation Button -->
 			<Button
@@ -16,14 +16,6 @@
 				}}
 			</Button>
 		</div>
-
-		<!-- Restriction notices -->
-		<RestrictionNotices
-			:can-request-cancellation="canRequestCancellation"
-			:can-transfer-tickets="canTransferTickets"
-			:can-change-add-ons="canChangeAddOns"
-			:cancellation-request="cancellationRequest"
-		/>
 
 		<!-- Tickets Grid -->
 		<ol class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -41,15 +33,15 @@
 	</div>
 </template>
 
-<script setup>
-import { computed } from "vue";
+<script setup lang="ts">
+import type { EventTicket } from "@/types";
 import { Button } from "frappe-ui";
+import { computed, type PropType } from "vue";
 import TicketCard from "./TicketCard.vue";
-import RestrictionNotices from "./RestrictionNotices.vue";
 
 const props = defineProps({
 	tickets: {
-		type: Array,
+		type: Array as PropType<EventTicket[]>,
 		required: true,
 	},
 	canRequestCancellation: {
@@ -65,15 +57,15 @@ const props = defineProps({
 		default: false,
 	},
 	cancellationRequest: {
-		type: Object,
+		type: Object as PropType<Record<string, any> | null>,
 		default: null,
 	},
 	cancellationRequestedTickets: {
-		type: Array,
+		type: Array as PropType<string[]>,
 		default: () => [],
 	},
 	cancelledTickets: {
-		type: Array,
+		type: Array as PropType<string[]>,
 		default: () => [],
 	},
 });
@@ -84,8 +76,8 @@ defineEmits(["request-cancellation", "transfer-success"]);
 const hasTicketsAvailableForCancellation = computed(() => {
 	return props.tickets.some(
 		(ticket) =>
-			!props.cancelledTickets.includes(ticket.name) &&
-			!props.cancellationRequestedTickets.includes(ticket.name)
+			!props.cancelledTickets.includes(ticket.name ?? "") &&
+			!props.cancellationRequestedTickets.includes(ticket.name ?? "")
 	);
 });
 
@@ -99,11 +91,11 @@ const showCancellationButton = computed(() => {
 	);
 });
 
-const isCancellationRequestedTicket = (ticketId) => {
-	return props.cancellationRequestedTickets?.includes(ticketId) || false;
+const isCancellationRequestedTicket = (ticketId?: string) => {
+	return props.cancellationRequestedTickets?.includes(ticketId ?? "") || false;
 };
 
-const isCancelledTicket = (ticketId) => {
-	return props.cancelledTickets?.includes(ticketId) || false;
+const isCancelledTicket = (ticketId?: string) => {
+	return props.cancelledTickets?.includes(ticketId ?? "") || false;
 };
 </script>

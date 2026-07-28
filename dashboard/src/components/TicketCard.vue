@@ -1,5 +1,5 @@
 <template>
-	<li class="shadow-md p-4 rounded-lg bg-surface-white border border-outline-gray-2 relative">
+	<li class="shadow-md p-4 rounded-lg bg-surface-base border border-outline-gray-2 relative">
 		<!-- Status Badge -->
 		<div v-if="isCancelled || isCancellationRequested" class="absolute top-2 left-2">
 			<Badge
@@ -21,13 +21,13 @@
 		<!-- Three-dot dropdown menu -->
 		<div class="absolute top-2 right-2">
 			<Dropdown :options="ticketActions" placement="left" v-if="ticketActions.length > 0">
-				<Button variant="ghost" icon="more-horizontal" size="sm" />
+				<Button variant="ghost" icon="lucide-more-horizontal" size="sm" />
 			</Dropdown>
 		</div>
 
 		<div>
 			<h4
-				class="text-md font-semibold text-ink-gray-9"
+				class="text-md-semibold text-ink-gray-9"
 				:class="{ 'mt-6': isCancelled || isCancellationRequested }"
 			>
 				{{ ticket.attendee_name }}
@@ -42,7 +42,7 @@
 
 			<!-- Add-ons Section -->
 			<div v-if="ticket.add_ons && ticket.add_ons.length > 0" class="mt-3">
-				<h5 class="text-sm font-medium text-ink-gray-8 mb-2">{{ __("Add-ons:") }}</h5>
+				<h5 class="text-sm-medium text-ink-gray-8 mb-2">{{ __("Add-ons:") }}</h5>
 				<div class="space-y-3">
 					<div
 						v-for="addon in ticket.add_ons"
@@ -61,10 +61,19 @@
 				<img
 					:src="ticket.qr_code"
 					:alt="__('QR Code')"
-					class="w-20 h-20 contrast-100 brightness-100"
+					:title="__('Click to enlarge')"
+					class="w-20 h-20 contrast-100 brightness-100 cursor-pointer hover:opacity-80 transition-opacity"
+					@click.stop="showQRExpanded = true"
 				/>
 			</div>
 		</div>
+
+		<!-- QR Code Expand Dialog -->
+		<QRCodeExpandDialog
+			v-model="showQRExpanded"
+			:qrCodeSrc="ticket.qr_code"
+			:altText="__('QR Code')"
+		/>
 
 		<!-- Ticket Transfer Dialog -->
 		<TicketTransferDialog
@@ -82,13 +91,21 @@
 	</li>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-import { Button, Dropdown, Badge } from "frappe-ui";
-import TicketTransferDialog from "./TicketTransferDialog.vue";
-import AddOnPreferenceDialog from "./AddOnPreferenceDialog.vue";
-import LucideUserPen from "~icons/lucide/user-pen";
+<script setup lang="ts">
+import type { TicketAddOn } from "@/types";
+import { Badge, Button, Dropdown } from "frappe-ui";
+import { type Component, computed, ref } from "vue";
 import LucideEdit from "~icons/lucide/edit";
+import LucideUserPen from "~icons/lucide/user-pen";
+import AddOnPreferenceDialog from "./AddOnPreferenceDialog.vue";
+import QRCodeExpandDialog from "./QRCodeExpandDialog.vue";
+import TicketTransferDialog from "./TicketTransferDialog.vue";
+
+interface TicketAction {
+	label: string;
+	icon: Component;
+	onClick: () => void;
+}
 
 const props = defineProps({
 	ticket: {
@@ -117,16 +134,19 @@ const emit = defineEmits(["transfer-success"]);
 
 const showTransferDialog = ref(false);
 const showPreferenceDialog = ref(false);
+const showQRExpanded = ref(false);
 
 // Check if ticket has customizable add-ons
 const hasCustomizableAddOns = computed(() => {
 	return (
-		props.ticket?.add_ons?.some((addon) => addon.options && addon.options.length > 0) || false
+		props.ticket?.add_ons?.some(
+			(addon: TicketAddOn) => addon.options && addon.options.length > 0
+		) || false
 	);
 });
 
 const ticketActions = computed(() => {
-	const actions = [];
+	const actions: TicketAction[] = [];
 
 	// Don't show any actions if ticket is cancelled or has a pending cancellation request
 	if (props.isCancelled || props.isCancellationRequested) {

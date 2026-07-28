@@ -10,12 +10,14 @@
   "column_break_esac",
   "status",
   "event",
+  "section_break_gusn",
+  "speakers",
   "section_break_yqfb",
   "description",
-  "column_break_kemm",
-  "speakers",
   "section_break_ouiw",
-  "phone"
+  "phone",
+  "section_break_additional",
+  "additional_fields"
  ],
  "fields": [
   {
@@ -37,9 +39,9 @@
   {
    "default": "Review Pending",
    "fieldname": "status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Status",
-   "options": "Review Pending\nShortlisted\nApproved\nRejected"
+   "options": "Talk Proposal Status"
   },
   {
    "fieldname": "event",
@@ -59,14 +61,11 @@
    "label": "Description"
   },
   {
-   "fieldname": "column_break_kemm",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "speakers",
    "fieldtype": "Table",
    "label": "Speakers",
-   "options": "Proposal Speaker"
+   "options": "Proposal Speaker",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_ouiw",
@@ -76,6 +75,20 @@
    "fieldname": "phone",
    "fieldtype": "Phone",
    "label": "Phone"
+  },
+  {
+   "fieldname": "section_break_additional",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "additional_fields",
+   "fieldtype": "Table",
+   "label": "Additional Fields",
+   "options": "Additional Field"
+  },
+  {
+   "fieldname": "section_break_gusn",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -86,7 +99,7 @@
    "link_fieldname": "proposal"
   }
  ],
- "modified": "2025-12-02 15:48:20.148917",
+ "modified": "2026-07-22 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Proposals",
  "name": "Talk Proposal",
@@ -103,13 +116,62 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Event Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Buzz User",
+   "share": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Orange",
+   "title": "Review Pending"
+  },
+  {
+   "color": "Blue",
+   "title": "Shortlisted"
+  },
+  {
+   "color": "Green",
+   "title": "Accepted"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Purple",
+   "title": "Replied"
+  },
+  {
+   "color": "Gray",
+   "title": "Duplicate"
+  }
+ ],
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1,

@@ -1,10 +1,10 @@
 <template>
 	<div v-if="customFields.length > 0" class="space-y-4">
-		<h5 v-if="showTitle" class="text-base font-medium text-ink-gray-8 border-b pb-2">
+		<h5 v-if="showTitle" class="text-base-medium text-ink-gray-8 border-b pb-2">
 			{{ __(title) || __("Additional Information") }}
 		</h5>
 
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
 			<CustomFieldInput
 				v-for="field in customFields"
 				:key="field.fieldname"
@@ -16,17 +16,18 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { type FrappeField, getFieldDefaultValue } from "@/composables/useCustomFields";
+import { type PropType } from "vue";
 import CustomFieldInput from "./CustomFieldInput.vue";
-import { getFieldOptions, getFieldDefaultValue } from "@/composables/useCustomFields.js";
 
 const props = defineProps({
 	customFields: {
-		type: Array,
+		type: Array as PropType<FrappeField[]>,
 		default: () => [],
 	},
 	modelValue: {
-		type: Object,
+		type: Object as PropType<Record<string, any>>,
 		default: () => ({}),
 	},
 	title: {
@@ -42,7 +43,7 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"]);
 
 // Get field value from model
-const getFieldValue = (fieldname) => {
+const getFieldValue = (fieldname: string) => {
 	const currentValue = props.modelValue[fieldname];
 
 	// If field already has a value, return it
@@ -64,7 +65,7 @@ const getFieldValue = (fieldname) => {
 };
 
 // Update field value in model
-const updateFieldValue = (fieldname, value) => {
+const updateFieldValue = (fieldname: string, value: any) => {
 	const updatedValue = { ...props.modelValue, [fieldname]: value };
 	emit("update:modelValue", updatedValue);
 };

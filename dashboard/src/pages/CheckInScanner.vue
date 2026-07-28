@@ -5,7 +5,7 @@
 		<!-- Header -->
 		<div class="shadow-sm border-b">
 			<div class="max-w-md mx-auto px-4 py-4">
-				<h1 class="text-xl font-bold text-center text-gray-900 dark:text-white">
+				<h1 class="text-2xl-bold text-center text-gray-900 dark:text-white">
 					{{ __("Event Check-in Scanner") }}
 				</h1>
 			</div>
@@ -23,7 +23,7 @@
 					<LucideShieldX class="w-8 h-8 text-red-600 dark:text-red-400" />
 				</div>
 				<div>
-					<h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+					<h4 class="text-lg-medium text-gray-900 dark:text-white mb-2">
 						{{ __("Access Denied") }}
 					</h4>
 					<p class="text-gray-600 dark:text-gray-400">
@@ -42,14 +42,14 @@
 			<!-- Event Selection -->
 			<EventSelector
 				v-if="!selectedEvent"
-				:selected-event="selectedEvent"
+				:selected-event="selectedEvent || undefined"
 				@select="selectEvent"
 			/>
 
 			<!-- Scanner Interface -->
 			<div v-else class="space-y-6">
 				<!-- Selected Event Info -->
-				<BackButton :label="selectedEvent.title" @click="clearEventSelection" />
+				<BackButton :label="selectedEvent?.title" @click="clearEventSelection" />
 
 				<!-- QR Scanner -->
 				<QRScanner ref="qrScannerRef" />
@@ -65,7 +65,7 @@
 					<div
 						class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
 					>
-						<p class="text-sm font-medium text-green-800 dark:text-green-200">
+						<p class="text-sm-medium text-green-800 dark:text-green-200">
 							{{ validationResult.message }}
 						</p>
 						<p
@@ -80,22 +80,36 @@
 		</div>
 
 		<!-- Ticket Details Modal -->
-		<TicketDetailsModal :selected-event="selectedEvent" />
+		<TicketDetailsModal :selected-event="selectedEvent || undefined" />
 	</div>
 </template>
 
-<script setup>
-import { Button } from "frappe-ui";
+<script setup lang="ts">
+import { useTicketValidation } from "@/composables/useTicketValidation";
+import { userResource } from "@/data/user";
+import { createResource } from "frappe-ui";
 import { computed, onMounted, ref } from "vue";
-import BackButton from "../components/common/BackButton.vue";
+import { useRouter } from "vue-router";
+import LucideShieldX from "~icons/lucide/shield-x";
 import EventSelector from "../components/EventSelector.vue";
 import QRScanner from "../components/QRScanner.vue";
 import TicketDetailsModal from "../components/TicketDetailsModal.vue";
-import { useTicketValidation } from "../composables/useTicketValidation.js";
-import LucideShieldX from "~icons/lucide/shield-x";
-import { userResource } from "../data/user.js";
+import BackButton from "../components/common/BackButton.vue";
 
-const userProfile = ref({});
+const props = defineProps({
+	eventName: {
+		type: String,
+		default: "",
+	},
+});
+
+interface UserProfile {
+	roles?: { role: string }[];
+	[key: string]: any;
+}
+
+const router = useRouter();
+const userProfile = ref<UserProfile>({});
 
 const hasRequiredRole = computed(() => {
 	if (!userProfile.value || !userProfile.value.roles) return false;
@@ -105,21 +119,41 @@ const hasRequiredRole = computed(() => {
 const { validationResult, clearResults } = useTicketValidation();
 
 // State
-const selectedEvent = ref(null);
-const qrScannerRef = ref(null);
+const selectedEvent = ref<Record<string, any> | null>(null);
+const qrScannerRef = ref<InstanceType<typeof QRScanner> | null>(null);
 
 // Event selection
-const selectEvent = (event) => {
+const selectEvent = (event: Record<string, any>) => {
 	selectedEvent.value = event;
 	clearResults();
+	router.replace({ name: "check-in", params: { eventName: event.name } });
 };
 
 const clearEventSelection = () => {
 	selectedEvent.value = null;
 	clearResults();
+	router.replace({ name: "check-in" });
 };
 
 onMounted(() => {
 	userProfile.value = { ...userResource.data };
+
+	if (props.eventName) {
+		const eventResource = createResource({
+			url: "frappe.client.get_list",
+			params: {
+				doctype: "Buzz Event",
+				filters: { name: props.eventName },
+				fields: ["name", "title", "start_date", "start_time", "end_date", "end_time"],
+				limit_page_length: 1,
+			},
+			auto: false,
+		});
+		eventResource.fetch().then(() => {
+			if (eventResource.data && eventResource.data.length > 0) {
+				selectedEvent.value = eventResource.data[0];
+			}
+		});
+	}
 });
 </script>

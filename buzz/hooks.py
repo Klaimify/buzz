@@ -18,7 +18,30 @@ before_uninstall = "buzz.uninstall.before_uninstall"
 
 
 website_route_rules = [
-	{"from_route": "/dashboard/<path:app_path>", "to_route": "dashboard"},
+	{"from_route": "/b", "to_route": "dashboard"},
+	{"from_route": "/b/<path:app_path>", "to_route": "dashboard"},
+]
+
+# Keep old /dashboard/* links working: redirect to the shortened /b/* scheme.
+# Ordered specific -> catch-all; the first matching source wins.
+# forward_query_parameters is required on every rule: without it the query
+# string is dropped, which would strip the access token off guest booking
+# confirmation links.
+website_redirects = [
+	{
+		"source": r"/dashboard/events/([^/]+)/forms/([^/]+)",
+		"target": r"/b/\1/\2",
+		"forward_query_parameters": True,
+	},
+	{
+		"source": r"/dashboard/book-tickets/(.+)",
+		"target": r"/b/register/\1",
+		"forward_query_parameters": True,
+	},
+	{"source": r"/dashboard/(.*)", "target": r"/b/\1", "forward_query_parameters": True},
+	# Bare /dashboard has no trailing slash for the catch-all above to match, and
+	# www/dashboard.html would otherwise serve the SPA shell under the wrong base.
+	{"source": r"/dashboard", "target": "/b", "forward_query_parameters": True},
 ]
 
 # Scheduled Tasks
@@ -39,7 +62,7 @@ doc_events = {
 	},
 }
 
-fixtures = [{"dt": "Role", "filters": {"name": ["Buzz User", "Frontdesk Manager"]}}]
+fixtures = [{"dt": "Role", "filters": {"name": ["in", ["Buzz User", "Frontdesk Manager"]]}}]
 
 user_invitation = {"allowed_roles": {"Event Manager": ["Buzz User"], "Buzz User": ["Buzz User"]}}
 
@@ -49,22 +72,22 @@ ignore_links_on_delete = ["Ticket Cancellation Request", "Ticket Add-on Value"]
 after_app_install = "buzz.install.after_app_install"
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "events",
-# 		"logo": "/assets/events/logo.png",
-# 		"title": "Events",
-# 		"route": "/events",
-# 		"has_permission": "buzz.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": "buzz",
+		"logo": "/assets/buzz/images/buzz-logo-rounded.png",
+		"title": "Buzz",
+		"route": "/app/buzz",
+		"has_permission": "buzz.api.has_app_permission",
+	}
+]
 
 # Includes in <head>
 # ------------------
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/events/css/events.css"
-# app_include_js = "/assets/events/js/events.js"
+# app_include_js = "/assets/buzz/js/events.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/events/css/events.css"
@@ -145,7 +168,8 @@ after_app_install = "buzz.install.after_app_install"
 # Name of the app being uninstalled is passed as an argument
 
 # before_app_uninstall = "events.utils.before_app_uninstall"
-# after_app_uninstall = "events.utils.after_app_uninstall"
+after_app_uninstall = "buzz.install.after_app_uninstall"
+after_migrate = "buzz.install.on_migrate"
 
 # Desk Notifications
 # ------------------
@@ -164,6 +188,14 @@ after_app_install = "buzz.install.after_app_install"
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
+
+permission_query_conditions = {
+	"Talk Proposal": "buzz.proposals.doctype.talk_proposal.talk_proposal.get_permission_query_conditions",
+}
+
+has_permission = {
+	"Talk Proposal": "buzz.proposals.doctype.talk_proposal.talk_proposal.has_talk_proposal_permission",
+}
 
 # Document Events
 # ---------------

@@ -1,7 +1,7 @@
 <template>
-	<div class="bg-surface-cards border border-outline-gray-1 rounded-lg p-6">
+	<div class="bg-surface-elevation-1 border border-outline-gray-1 rounded-lg p-6">
 		<div class="mb-8 flex items-center justify-between">
-			<h3 class="text-lg font-semibold text-ink-gray-9">{{ event.title }}</h3>
+			<h3 class="text-lg-semibold text-ink-gray-9">{{ event.title }}</h3>
 
 			<Button
 				:link="`/events/${event.route}`"
@@ -17,7 +17,7 @@
 			<div>
 				<div class="flex items-center text-ink-gray-6 mb-1">
 					<LucideCalendarDays class="w-4 h-4 mr-2 flex-shrink-0" />
-					<span class="text-sm font-medium">{{ __("Start Date") }}</span>
+					<span class="text-sm-medium">{{ __("Start Date") }}</span>
 				</div>
 				<p class="text-ink-gray-9 font-medium">
 					{{ formatEventDateTime(event.start_date, event.start_time) }}
@@ -28,7 +28,7 @@
 			<div v-if="event.end_date">
 				<div class="flex items-center text-ink-gray-6 mb-1">
 					<LucideCalendarDays class="w-4 h-4 mr-2 flex-shrink-0" />
-					<span class="text-sm font-medium">{{ __("End Date") }}</span>
+					<span class="text-sm-medium">{{ __("End Date") }}</span>
 				</div>
 				<p class="text-ink-gray-9 font-medium">
 					{{ formatEventDateTime(event.end_date, event.end_time) }}
@@ -36,12 +36,15 @@
 			</div>
 
 			<!-- Venue -->
-			<div v-if="event.venue">
+			<div v-if="venue">
 				<div class="flex items-center text-ink-gray-6 mb-1">
 					<LucideMapPin class="w-4 h-4 mr-2 flex-shrink-0" />
-					<span class="text-sm font-medium">{{ __("Venue") }}</span>
+					<span class="text-sm-medium">{{ __("Venue") }}</span>
 				</div>
-				<p class="text-ink-gray-9 font-medium">{{ event.venue }}</p>
+				<p class="text-ink-gray-9 font-medium">{{ venue.name }}</p>
+				<p v-if="venue.address" class="text-sm text-ink-gray-6 mt-1">
+					{{ venue.address }}
+				</p>
 			</div>
 
 			<!-- Event Description -->
@@ -52,16 +55,16 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { dayjsLocal } from "frappe-ui";
 import LucideCalendarDays from "~icons/lucide/calendar-days";
 import LucideMapPin from "~icons/lucide/map-pin";
-import { dayjsLocal } from "frappe-ui";
 
 defineProps({
 	event: {
 		type: Object,
 		required: true,
-		validator: (value) => {
+		validator: (value: any) => {
 			return (
 				typeof value.title === "string" &&
 				value.start_date &&
@@ -69,10 +72,14 @@ defineProps({
 			);
 		},
 	},
+	venue: {
+		type: Object,
+		default: null,
+	},
 });
 
 // Helper function to format date and time together (matching TicketDetails.vue)
-const formatEventDateTime = (date, time) => {
+const formatEventDateTime = (date: string, time: string) => {
 	if (!date) return "";
 
 	// Create a date object from the date string
