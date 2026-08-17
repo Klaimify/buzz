@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.utils import now_datetime
+from frappe.utils import cint, now_datetime
 
 # Categories whose events are run through Zoom. Keyed to the Zoom session doctype each
 # one creates, so a lookup doubles as the "is this Zoom-backed?" check.
@@ -121,7 +121,9 @@ def make_qr_image(data: str) -> bytes:
 	return output.getvalue()
 
 
-def generate_qr_code_file(doc, data: str, field_name: str = "qr_code", file_prefix: str = "qr-code") -> str:
+def generate_qr_code_file(
+	doc, data: str, field_name: str = "qr_code", file_prefix: str = "qr-code", is_private: bool = True
+) -> str:
 	"""
 	Generate QR code image and attach as File to a document.
 
@@ -129,6 +131,7 @@ def generate_qr_code_file(doc, data: str, field_name: str = "qr_code", file_pref
 	:param data: The data to encode in the QR code
 	:param field_name: The field name to attach the file to (default: "qr_code")
 	:param file_prefix: Prefix for the file name (default: "qr-code")
+	:param is_private: Whether the generated file should be private (default: True)
 	:return: The file URL of the created QR code image
 	"""
 	qr_data = make_qr_image(data)
@@ -140,6 +143,7 @@ def generate_qr_code_file(doc, data: str, field_name: str = "qr_code", file_pref
 			"attached_to_name": doc.name,
 			"attached_to_field": field_name,
 			"file_name": f"{file_prefix}-{doc.name}.png",
+			"is_private": cint(is_private),
 		}
 	).save(ignore_permissions=True)
 	return qr_code_file.file_url
