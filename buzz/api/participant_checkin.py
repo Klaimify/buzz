@@ -22,7 +22,7 @@ def get_my_badge() -> dict:
 		"token": build_token(ticket.name, ticket.qr_version or 1),
 		"registration_id": ticket.registration_id,
 		"attendee_name": ticket.attendee_name,
-		"category": ticket.ticket_type,
+		"category": frappe.db.get_value("Event Ticket Type", ticket.ticket_type, "title"),
 	}
 
 
@@ -43,7 +43,7 @@ def scan_checkin(code: str, scanned_at: str | None = None) -> dict:
 	result = {
 		"registration_id": ticket.registration_id,
 		"attendee_name": ticket.attendee_name,
-		"category": ticket.ticket_type,
+		"category": frappe.db.get_value("Event Ticket Type", ticket.ticket_type, "title"),
 		"organisation": ticket.organisation,
 	}
 

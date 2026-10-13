@@ -1,0 +1,17 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="text-center" style="padding: 48px 16px">
+	<h3>{{ _("Opening the IIRS 2027 app…") }}</h3>
+	<p class="text-muted">{{ _("If nothing happens, tap the button below on the phone where the app is installed.") }}</p>
+	<a id="open-app" class="btn btn-primary" href="#">{{ _("Open the app") }}</a>
+</div>
+<script>
+	(function () {
+		var token = new URLSearchParams(window.location.search).get("token") || "";
+		var link = "treacg://activate?token=" + encodeURIComponent(token);
+		document.getElementById("open-app").setAttribute("href", link);
+		if (token) window.location.replace(link);
+	})();
+</script>
+{% endblock %}

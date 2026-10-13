@@ -21,7 +21,7 @@ def get_directory(search: str | None = None, category: str | None = None, start:
 	if search:
 		like = f"%{search.strip()}%"
 		or_filters = [["attendee_name", "like", like], ["organisation", "like", like], ["country", "like", like]]
-	return frappe.get_all(
+	people = frappe.get_all(
 		"Event Ticket",
 		filters=filters,
 		or_filters=or_filters,
@@ -30,6 +30,13 @@ def get_directory(search: str | None = None, category: str | None = None, start:
 		limit_start=int(start),
 		limit_page_length=min(int(page_length), 100),
 	)
+	titles = {
+		row.name: row.title
+		for row in frappe.get_all("Event Ticket Type", filters={"event": ticket.event}, fields=["name", "title"])
+	}
+	for person in people:
+		person["category"] = titles.get(person.ticket_type)
+	return people
 
 
 @frappe.whitelist()
