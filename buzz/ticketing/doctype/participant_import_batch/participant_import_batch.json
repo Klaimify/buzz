@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "autoname": "format:IMP-{YYYY}-{#####}",
+ "creation": "2026-10-13 22:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["event", "source_system", "mode", "status", "column_break_a", "csv_file", "created", "updated", "unchanged", "disabled", "error_count", "section_log", "error_log"],
+ "fields": [
+  {"fieldname": "event", "fieldtype": "Link", "in_list_view": 1, "label": "Event", "options": "Buzz Event", "reqd": 1},
+  {"default": "csv", "fieldname": "source_system", "fieldtype": "Data", "label": "Source System", "reqd": 1, "description": "Records are matched on Event + Source System + External ID."},
+  {"default": "CSV", "fieldname": "mode", "fieldtype": "Select", "label": "Mode", "options": "CSV\nFrappe Sync\nAPI", "reqd": 1},
+  {"default": "Draft", "fieldname": "status", "fieldtype": "Select", "in_list_view": 1, "label": "Status", "options": "Draft\nQueued\nRunning\nDone\nFailed", "read_only": 1},
+  {"fieldname": "column_break_a", "fieldtype": "Column Break"},
+  {"fieldname": "csv_file", "fieldtype": "Attach", "label": "CSV File", "depends_on": "eval:doc.mode=='CSV'", "description": "Columns: external_id, full_name, email, phone, organisation, country, category, photo, cancelled"},
+  {"fieldname": "created", "fieldtype": "Int", "label": "Created", "read_only": 1},
+  {"fieldname": "updated", "fieldtype": "Int", "label": "Updated", "read_only": 1},
+  {"fieldname": "unchanged", "fieldtype": "Int", "label": "Unchanged", "read_only": 1},
+  {"fieldname": "disabled", "fieldtype": "Int", "label": "Cancelled", "read_only": 1},
+  {"fieldname": "error_count", "fieldtype": "Int", "label": "Errors", "read_only": 1},
+  {"fieldname": "section_log", "fieldtype": "Section Break", "label": "Row Errors"},
+  {"fieldname": "error_log", "fieldtype": "Code", "label": "Error Log", "options": "JSON", "read_only": 1}
+ ],
+ "links": [],
+ "modified": "2026-10-13 22:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Ticketing",
+ "name": "Participant Import Batch",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "delete": 1, "read": 1, "report": 1, "role": "System Manager", "write": 1},
+  {"create": 1, "read": 1, "report": 1, "role": "Event Manager", "write": 1}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

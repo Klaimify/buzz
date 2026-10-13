@@ -3,6 +3,7 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 
 from buzz.participants import credentials
+from buzz.participants.importer import upsert_participants
 from buzz.participants.invites import build_activation_link
 
 GENERIC_RESPONSE = {"message": "If this email is registered, we have sent you a sign-in link and code."}
@@ -63,3 +64,10 @@ def complete_sign_in(participant: str) -> dict:
 		as_dict=True,
 	)
 	return {**session, "participant": details}
+
+
+@frappe.whitelist()
+def upsert_registrations(event: str, source_system: str, rows: str) -> dict:
+	"""Push endpoint for a registration system. Same idempotent upsert as CSV and sync."""
+	frappe.only_for(["System Manager", "Event Manager"])
+	return upsert_participants(event, source_system, frappe.parse_json(rows))
