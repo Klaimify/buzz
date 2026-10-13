@@ -60,7 +60,7 @@ def complete_sign_in(participant: str) -> dict:
 	details = frappe.db.get_value(
 		"Event Ticket",
 		participant,
-		["registration_id", "attendee_name", "ticket_type", "organisation", "event"],
+		["registration_id", "attendee_name", "ticket_type", "organisation", "event", "face_signin_enabled", "show_in_directory"],
 		as_dict=True,
 	)
 	return {

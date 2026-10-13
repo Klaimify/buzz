@@ -7,5 +7,10 @@
   Imports set flags.skip_ticket_email; source cancellation cancels the ticket.
 - Auth: passwordless. Magic link (72h first, 15min later) + email OTP, hashed single-use tokens in cache,
   endpoints in buzz/api/participant_auth.py. Mobile gets `token key:secret` (new sign-in rotates secret).
-- Not yet done: Import Batch DocType/CSV upload UI, Frappe sync job, WhatsApp OTP, face sign-in, consent record,
-  QR token, check-in, hooks.py scheduler entry. No bench in sandbox: code is statically checked only.
+- Done: Participant Import Batch (CSV), 15-min Frappe sync (site_config participant_sync), signed QR (participants/qr.py),
+  scan check-in (idempotent, scanned_at replay), agenda, meetings (slot-row lock, buzz/participants/meetings.py),
+  directory (show_in_directory opt-out), leads, announcements, polls, Q&A, face consent + sign-in
+  (verifier hook participant_face_verifier or AWS Rekognition via site_config participant_face_aws).
+  New DocTypes live in module Participants. APIs in buzz/api/participant_*.py.
+- Not done: WhatsApp OTP, push notifications (app polls), per-device tokens, gate in check-in, tests beyond importer.
+  No bench in sandbox: code is statically checked only.

@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import today
+from frappe.utils import getdate, today
 
 from buzz.participants.qr import build_token, resolve_ticket
 
@@ -27,7 +27,7 @@ def get_my_badge() -> dict:
 
 
 @frappe.whitelist()
-def scan_checkin(code: str) -> dict:
+def scan_checkin(code: str, scanned_at: str | None = None) -> dict:
 	"""
 	Staff scan or manual lookup. Idempotent per participant and day: scanning again reports
 	"already checked in" instead of failing, so offline queues can be replayed safely.
@@ -47,7 +47,8 @@ def scan_checkin(code: str) -> dict:
 		"organisation": ticket.organisation,
 	}
 
-	checkin_date = today()
+	# scanned_at lets an offline queue replay a scan on the day it actually happened.
+	checkin_date = str(getdate(scanned_at)) if scanned_at else today()
 	existing = frappe.db.get_value("Event Check In", {"ticket": ticket_name, "date": checkin_date}, "creation")
 	if existing:
 		return {**result, "status": "already_checked_in", "checked_in_at": existing}

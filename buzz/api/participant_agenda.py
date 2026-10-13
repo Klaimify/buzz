@@ -50,6 +50,7 @@ def get_agenda() -> dict:
 		days.setdefault(str(item.date), []).append(
 			{
 				"type": item.type,
+				"talk": item.talk,
 				"title": talk.title if talk else (item.description or _("Break")),
 				"description": talk.description if talk else None,
 				"track": item.track,
