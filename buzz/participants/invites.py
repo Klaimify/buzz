@@ -14,11 +14,11 @@ def build_activation_link(token: str) -> str:
 
 def send_invite_wave(event: str, wave_size: int = DEFAULT_WAVE_SIZE, resend: bool = False) -> int:
 	"""Send invites to the next batch of participants. Call again for the next wave."""
-	statuses = ["Imported", "Invited"] if resend else ["Imported"]
+	statuses = ["Not Invited", "Invited"] if resend else ["Not Invited"]
 	participants = frappe.get_all(
-		"Event Participant",
-		filters={"event": event, "status": ("in", statuses)},
-		fields=["name", "full_name", "email", "registration_id", "invite_count"],
+		"Event Ticket",
+		filters={"event": event, "docstatus": 1, "access_status": ("in", statuses)},
+		fields=["name", "attendee_name", "attendee_email", "registration_id", "invite_count"],
 		order_by="creation asc",
 		limit=wave_size,
 	)
@@ -28,26 +28,26 @@ def send_invite_wave(event: str, wave_size: int = DEFAULT_WAVE_SIZE, resend: boo
 		token = issue_login_link_token(participant.name, first_activation=True)
 		try:
 			frappe.sendmail(
-				recipients=[participant.email],
+				recipients=[participant.attendee_email],
 				subject=_("Your {0} app access").format(event_title),
 				template="participant_invite",
 				args={
-					"full_name": participant.full_name,
+					"full_name": participant.attendee_name,
 					"registration_id": participant.registration_id,
 					"event_title": event_title,
 					"activation_link": build_activation_link(token),
 				},
-				reference_doctype="Event Participant",
+				reference_doctype="Event Ticket",
 				reference_name=participant.name,
 			)
 		except Exception:
 			frappe.log_error(f"Invite failed for {participant.name}")
 			continue
 		frappe.db.set_value(
-			"Event Participant",
+			"Event Ticket",
 			participant.name,
 			{
-				"status": "Invited",
+				"access_status": "Invited",
 				"invited_on": now_datetime(),
 				"invite_count": participant.invite_count + 1,
 			},

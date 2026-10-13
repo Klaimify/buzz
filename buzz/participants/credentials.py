@@ -18,10 +18,10 @@ def hash_value(value: str) -> str:
 
 
 def get_participant_by_email(email: str) -> str | None:
-	"""Newest enabled participant record for an email address."""
+	"""Newest active (submitted) Event Ticket for an email address."""
 	participants = frappe.get_all(
-		"Event Participant",
-		filters={"email": email.strip().lower(), "status": ("!=", "Disabled")},
+		"Event Ticket",
+		filters={"attendee_email": email.strip().lower(), "docstatus": 1},
 		pluck="name",
 		order_by="creation desc",
 		limit=1,
@@ -77,16 +77,17 @@ def verify_email_otp(participant: str, otp_code: str) -> None:
 
 def ensure_user(participant_name: str) -> str:
 	"""Create the passwordless Website User for a participant on first activation."""
-	participant = frappe.get_doc("Event Participant", participant_name)
+	participant = frappe.get_doc("Event Ticket", participant_name)
+	email = participant.attendee_email.strip().lower()
 	if participant.user and frappe.db.exists("User", participant.user):
 		return participant.user
 
-	if not frappe.db.exists("User", participant.email):
+	if not frappe.db.exists("User", email):
 		user = frappe.new_doc("User")
 		user.update(
 			{
-				"email": participant.email,
-				"first_name": participant.full_name,
+				"email": email,
+				"first_name": participant.attendee_name,
 				"user_type": "Website User",
 				"send_welcome_email": 0,
 				"enabled": 1,
@@ -95,17 +96,17 @@ def ensure_user(participant_name: str) -> str:
 		# Participants are created by the import pipeline, not by a logged-in desk user.
 		user.insert(ignore_permissions=True)
 
-	participant.db_set("user", participant.email)
-	return participant.email
+	participant.db_set("user", email)
+	return email
 
 
 def mark_activated(participant_name: str) -> None:
-	participant = frappe.db.get_value("Event Participant", participant_name, ["status"], as_dict=True)
-	if participant.status in ("Imported", "Invited"):
+	access_status = frappe.db.get_value("Event Ticket", participant_name, "access_status")
+	if access_status != "Activated":
 		frappe.db.set_value(
-			"Event Participant",
+			"Event Ticket",
 			participant_name,
-			{"status": "Activated", "activated_on": now_datetime()},
+			{"access_status": "Activated", "activated_on": now_datetime()},
 		)
 
 

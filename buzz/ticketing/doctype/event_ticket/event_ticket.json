@@ -21,7 +21,23 @@
   "section_break_cgvb",
   "add_ons",
   "section_break_yzvi",
-  "amended_from"
+  "amended_from",
+  "section_participant",
+  "registration_id",
+  "access_status",
+  "source_system",
+  "external_id",
+  "source_hash",
+  "organisation",
+  "phone",
+  "country",
+  "photo",
+  "user",
+  "invite_count",
+  "invited_on",
+  "activated_on",
+  "qr_version",
+  "face_signin_enabled"
  ],
  "fields": [
   {
@@ -130,6 +146,127 @@
    "fieldtype": "Table",
    "label": "Additional Fields",
    "options": "Additional Field"
+  },
+  {
+   "fieldname": "section_participant",
+   "fieldtype": "Section Break",
+   "label": "Participant and App Access"
+  },
+  {
+   "fieldname": "registration_id",
+   "fieldtype": "Data",
+   "label": "Registration ID",
+   "allow_on_submit": 1,
+   "unique": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "access_status",
+   "fieldtype": "Select",
+   "label": "App Access",
+   "allow_on_submit": 1,
+   "options": "Not Invited\nInvited\nActivated",
+   "default": "Not Invited",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "source_system",
+   "fieldtype": "Data",
+   "label": "Source System",
+   "allow_on_submit": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "external_id",
+   "fieldtype": "Data",
+   "label": "External ID",
+   "allow_on_submit": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "source_hash",
+   "fieldtype": "Data",
+   "label": "Source Hash",
+   "allow_on_submit": 1,
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "organisation",
+   "fieldtype": "Data",
+   "label": "Organisation",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone (E.164)",
+   "allow_on_submit": 1,
+   "options": "Phone"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "photo",
+   "fieldtype": "Attach Image",
+   "label": "Registration Photo",
+   "allow_on_submit": 1,
+   "private": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "App User",
+   "allow_on_submit": 1,
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invite_count",
+   "fieldtype": "Int",
+   "label": "Invites Sent",
+   "allow_on_submit": 1,
+   "read_only": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "invited_on",
+   "fieldtype": "Datetime",
+   "label": "Last Invited On",
+   "allow_on_submit": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "activated_on",
+   "fieldtype": "Datetime",
+   "label": "Activated On",
+   "allow_on_submit": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_version",
+   "fieldtype": "Int",
+   "label": "QR Version",
+   "allow_on_submit": 1,
+   "read_only": 1,
+   "default": "1",
+   "description": "Increase to revoke issued QR badges."
+  },
+  {
+   "fieldname": "face_signin_enabled",
+   "fieldtype": "Check",
+   "label": "Face Sign-in Enabled",
+   "allow_on_submit": 1,
+   "read_only": 1,
+   "description": "Opt-in biometric; consent recorded separately."
   }
  ],
  "grid_page_length": 50,

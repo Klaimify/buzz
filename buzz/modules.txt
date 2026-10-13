@@ -3,4 +3,3 @@ Events
 Ticketing
 Proposals
 Buzz Marketing
-Participants

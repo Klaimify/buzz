@@ -5,6 +5,7 @@ import frappe
 from frappe.core.api.user_invitation import invite_by_email
 from frappe.model.document import Document
 
+from buzz.participants.registration import generate_registration_id
 from buzz.utils import generate_ics_file, generate_qr_code_file, only_if_app_installed
 
 
@@ -23,7 +24,22 @@ class EventTicket(Document):
 		add_ons: DF.Table[TicketAddonValue]
 		additional_fields: DF.Table[AdditionalField]
 		amended_from: DF.Link | None
+		access_status: DF.Literal["Not Invited", "Invited", "Activated"]
+		activated_on: DF.Datetime | None
 		attendee_email: DF.Data
+		country: DF.Data | None
+		external_id: DF.Data | None
+		face_signin_enabled: DF.Check
+		invite_count: DF.Int
+		invited_on: DF.Datetime | None
+		organisation: DF.Data | None
+		phone: DF.Data | None
+		photo: DF.AttachImage | None
+		qr_version: DF.Int
+		registration_id: DF.Data | None
+		source_hash: DF.Data | None
+		source_system: DF.Data | None
+		user: DF.Link | None
 		attendee_name: DF.Data
 		booking: DF.Link | None
 		coupon_used: DF.Link | None
@@ -33,6 +49,10 @@ class EventTicket(Document):
 		qr_code: DF.AttachImage | None
 		ticket_type: DF.Link
 	# end: auto-generated types
+
+	def before_insert(self):
+		if not self.registration_id:
+			self.registration_id = generate_registration_id(self.event, self.ticket_type)
 
 	def before_validate(self):
 		# Backward compat: split attendee_name into first/last if first_name not provided
@@ -51,7 +71,9 @@ class EventTicket(Document):
 
 	def on_submit(self):
 		try:
-			self.send_ticket_email()
+			# Imported participants get the app invite instead of a ticket email.
+			if not self.flags.skip_ticket_email:
+				self.send_ticket_email()
 		except Exception as e:
 			frappe.log_error("Error sending ticket email: " + str(e))
 

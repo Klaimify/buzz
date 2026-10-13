@@ -16,8 +16,10 @@ def request_sign_in(email: str) -> dict:
 	if not participant:
 		return GENERIC_RESPONSE
 
-	recipient = frappe.db.get_value("Event Participant", participant, "email")
-	first_activation = frappe.db.get_value("Event Participant", participant, "status") != "Activated"
+	recipient, access_status = frappe.db.get_value(
+		"Event Ticket", participant, ["attendee_email", "access_status"]
+	)
+	first_activation = access_status != "Activated"
 	token = credentials.issue_login_link_token(participant, first_activation)
 	otp_code = credentials.issue_email_otp(participant)
 
@@ -55,9 +57,9 @@ def complete_sign_in(participant: str) -> dict:
 	credentials.mark_activated(participant)
 	session = credentials.issue_api_credentials(user)
 	details = frappe.db.get_value(
-		"Event Participant",
+		"Event Ticket",
 		participant,
-		["registration_id", "full_name", "category", "organisation", "event"],
+		["registration_id", "attendee_name", "ticket_type", "organisation", "event"],
 		as_dict=True,
 	)
 	return {**session, "participant": details}
