@@ -36,6 +36,7 @@ class EventTicket(Document):
 		phone: DF.Data | None
 		photo: DF.AttachImage | None
 		qr_version: DF.Int
+		show_in_directory: DF.Check
 		registration_id: DF.Data | None
 		source_hash: DF.Data | None
 		source_system: DF.Data | None

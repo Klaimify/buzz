@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "creation": "2026-10-13 23:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "event",
+  "requester",
+  "invitee",
+  "slot",
+  "table_no",
+  "status",
+  "message"
+ ],
+ "fields": [
+  {
+   "fieldname": "event",
+   "fieldtype": "Link",
+   "label": "Event",
+   "options": "Buzz Event",
+   "reqd": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "requester",
+   "fieldtype": "Link",
+   "label": "Requester",
+   "options": "Event Ticket",
+   "reqd": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "invitee",
+   "fieldtype": "Link",
+   "label": "Invitee",
+   "options": "Event Ticket",
+   "reqd": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "slot",
+   "fieldtype": "Link",
+   "label": "Slot",
+   "options": "Meeting Slot",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "table_no",
+   "fieldtype": "Int",
+   "label": "Table"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Requested\nAccepted\nDeclined\nCancelled",
+   "default": "Requested",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Message"
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-13 23:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Participants",
+ "name": "Meeting Request",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1,
+   "export": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Event Manager",
+   "write": 1,
+   "export": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "hash"
+}
