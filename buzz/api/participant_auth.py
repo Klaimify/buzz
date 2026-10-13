@@ -63,7 +63,11 @@ def complete_sign_in(participant: str) -> dict:
 		["registration_id", "attendee_name", "ticket_type", "organisation", "event"],
 		as_dict=True,
 	)
-	return {**session, "participant": details}
+	return {
+		**session,
+		"participant": details,
+		"is_staff": "Frontdesk Manager" in frappe.get_roles(user),
+	}
 
 
 @frappe.whitelist()
