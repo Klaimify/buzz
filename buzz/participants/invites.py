@@ -12,6 +12,18 @@ def build_activation_link(token: str) -> str:
 	return f"{app_link_base}/activate?token={token}"
 
 
+def send_sign_in_email(participant: str, otp_code: str, link_token: str) -> None:
+	recipient = frappe.db.get_value("Event Ticket", participant, "attendee_email")
+	frappe.sendmail(
+		recipients=[recipient],
+		subject=_("Your sign-in code"),
+		message=_(
+			"Your code is <b>{0}</b> (valid 10 minutes).<br><br>Or <a href='{1}'>open the app directly</a> (valid 15 minutes)."
+		).format(otp_code, build_activation_link(link_token)),
+		now=True,
+	)
+
+
 def send_invite_wave(event: str, wave_size: int = DEFAULT_WAVE_SIZE, resend: bool = False) -> int:
 	"""Send invites to the next batch of participants. Call again for the next wave."""
 	statuses = ["Not Invited", "Invited"] if resend else ["Not Invited"]

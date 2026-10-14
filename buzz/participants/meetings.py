@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
 
+from buzz.participants.push import enqueue_notification
+
 ACTIVE_STATUSES = ["Requested", "Accepted"]
 
 
@@ -48,6 +50,12 @@ def request_meeting(requester: frappe._dict, invitee: frappe._dict, slot: str, m
 	)
 	# Participants are Website Users with no desk permissions; access is checked by the caller.
 	meeting.insert(ignore_permissions=True)
+	enqueue_notification(
+		[invitee.name],
+		_("New meeting request"),
+		_("{0} would like to meet you").format(requester.attendee_name),
+		{"type": "meeting", "name": meeting.name},
+	)
 	return meeting.name
 
 
@@ -66,4 +74,13 @@ def respond_to_meeting(meeting_name: str, ticket: str, action: str) -> str:
 	else:
 		frappe.throw(_("Unknown action"))
 	meeting.save(ignore_permissions=True)
+
+	other_party = meeting.requester if ticket == meeting.invitee else meeting.invitee
+	actor_name = frappe.db.get_value("Event Ticket", ticket, "attendee_name")
+	enqueue_notification(
+		[other_party],
+		_("Meeting {0}").format(_(meeting.status).lower()),
+		_("{0}: {1}").format(actor_name, _(meeting.status).lower()),
+		{"type": "meeting", "name": meeting.name},
+	)
 	return meeting.status

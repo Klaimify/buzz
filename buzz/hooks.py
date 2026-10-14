@@ -57,6 +57,9 @@ before_tests = "buzz.install.before_tests"
 
 
 doc_events = {
+	"Participant Announcement": {
+		"after_insert": "buzz.participants.push.on_announcement_created",
+	},
 	"User": {
 		"after_insert": "buzz.utils.add_buzz_user_role",
 		"on_update": "buzz.events.doctype.speaker_profile.speaker_profile.update_speaker_display_name",

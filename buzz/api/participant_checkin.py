@@ -27,10 +27,11 @@ def get_my_badge() -> dict:
 
 
 @frappe.whitelist()
-def scan_checkin(code: str, scanned_at: str | None = None) -> dict:
+def scan_checkin(code: str, scanned_at: str | None = None, gate: str | None = None) -> dict:
 	"""
 	Staff scan or manual lookup. Idempotent per participant and day: scanning again reports
 	"already checked in" instead of failing, so offline queues can be replayed safely.
+	`gate` records the entrance used; the first scan of the day decides the gate.
 	"""
 	frappe.only_for("Frontdesk Manager", True)
 	ticket_name = resolve_ticket(code)
@@ -49,14 +50,32 @@ def scan_checkin(code: str, scanned_at: str | None = None) -> dict:
 
 	# scanned_at lets an offline queue replay a scan on the day it actually happened.
 	checkin_date = str(getdate(scanned_at)) if scanned_at else today()
-	existing = frappe.db.get_value("Event Check In", {"ticket": ticket_name, "date": checkin_date}, "creation")
+	gate = (gate or "").strip()[:50] or None
+	existing = frappe.db.get_value(
+		"Event Check In", {"ticket": ticket_name, "date": checkin_date, "docstatus": 1}, ["creation", "gate"], as_dict=True
+	)
 	if existing:
-		return {**result, "status": "already_checked_in", "checked_in_at": existing}
+		return {**result, "status": "already_checked_in", "checked_in_at": existing.creation, "gate": existing.gate}
 
 	checkin = frappe.new_doc("Event Check In")
 	checkin.ticket = ticket_name
 	checkin.date = checkin_date
+	checkin.gate = gate
 	# Staff already passed the Frontdesk Manager role check above.
 	checkin.insert(ignore_permissions=True)
 	checkin.submit()
-	return {**result, "status": "checked_in", "checked_in_at": checkin.creation}
+	return {**result, "status": "checked_in", "checked_in_at": checkin.creation, "gate": gate}
+
+
+@frappe.whitelist()
+def get_gate_stats(date: str | None = None) -> list[dict]:
+	"""Check-ins per gate for a day (default today), for the staff scanner screen."""
+	frappe.only_for("Frontdesk Manager", True)
+	rows = frappe.get_all(
+		"Event Check In",
+		filters={"date": str(getdate(date)) if date else today(), "docstatus": 1},
+		fields=["gate", "count(name) as total"],
+		group_by="gate",
+	)
+	rows.sort(key=lambda row: row.total, reverse=True)
+	return [{"gate": row.gate or _("No gate"), "total": row.total} for row in rows]

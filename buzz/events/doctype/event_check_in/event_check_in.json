@@ -7,6 +7,7 @@
  "field_order": [
   "event",
   "date",
+  "gate",
   "column_break_fxzb",
   "ticket",
   "section_break_tt1x",
@@ -51,6 +52,13 @@
    "fieldname": "date",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "fieldname": "gate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Gate",
+   "description": "Entrance where the badge was scanned"
   }
  ],
  "grid_page_length": 50,

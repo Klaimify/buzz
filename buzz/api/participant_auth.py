@@ -2,37 +2,46 @@ import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 
-from buzz.participants import credentials
+from buzz.participants import credentials, whatsapp
 from buzz.participants.importer import upsert_participants
-from buzz.participants.invites import build_activation_link
 
 GENERIC_RESPONSE = {"message": "If this email is registered, we have sent you a sign-in link and code."}
 
 
 @frappe.whitelist(allow_guest=True)  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @rate_limit(key="email", limit=3, seconds=3600)
-def request_sign_in(email: str) -> dict:
-	"""Email a magic link and a 6-digit code. Always answers the same way to avoid account enumeration."""
+def request_sign_in(email: str, channel: str = "email") -> dict:
+	"""
+	Send a 6-digit code (and magic link by email) through email or WhatsApp. Always answers the same
+	way to avoid account enumeration. WhatsApp falls back to email when it cannot be delivered.
+	"""
+	if channel == "whatsapp" and not whatsapp.is_configured():
+		frappe.throw(_("WhatsApp sign-in is not available. Please use email."))
+
 	participant = credentials.get_participant_by_email(email or "")
 	if not participant:
 		return GENERIC_RESPONSE
 
-	recipient, access_status = frappe.db.get_value(
-		"Event Ticket", participant, ["attendee_email", "access_status"]
-	)
-	first_activation = access_status != "Activated"
-	token = credentials.issue_login_link_token(participant, first_activation)
+	access_status = frappe.db.get_value("Event Ticket", participant, "access_status")
+	token = credentials.issue_login_link_token(participant, access_status != "Activated")
 	otp_code = credentials.issue_email_otp(participant)
 
-	frappe.enqueue(
-		"frappe.sendmail",
-		recipients=[recipient],
-		subject=_("Your sign-in code"),
-		message=_(
-			"Your code is <b>{0}</b> (valid 10 minutes).<br><br>Or <a href='{1}'>open the app directly</a> (valid 15 minutes)."
-		).format(otp_code, build_activation_link(token)),
-		now=True,
-	)
+	if channel == "whatsapp":
+		frappe.enqueue(
+			"buzz.participants.whatsapp.send_otp_with_fallback",
+			participant=participant,
+			otp_code=otp_code,
+			link_token=token,
+			queue="short",
+		)
+	else:
+		frappe.enqueue(
+			"buzz.participants.invites.send_sign_in_email",
+			participant=participant,
+			otp_code=otp_code,
+			link_token=token,
+			queue="short",
+		)
 	return GENERIC_RESPONSE
 
 

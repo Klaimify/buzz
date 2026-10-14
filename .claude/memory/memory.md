@@ -12,5 +12,17 @@
   directory (show_in_directory opt-out), leads, announcements, polls, Q&A, face consent + sign-in
   (verifier hook participant_face_verifier or AWS Rekognition via site_config participant_face_aws).
   New DocTypes live in module Participants. APIs in buzz/api/participant_*.py.
-- Not done: WhatsApp OTP, push notifications (app polls), per-device tokens, gate in check-in, tests beyond importer.
-  No bench in sandbox: code is statically checked only.
+- Push (Expo): Participant Device doctype (one row per token), api/participant_notifications.py register/unregister,
+  participants/push.py (batches of 100, prunes DeviceNotRegistered). Triggers: Participant Announcement after_insert hook,
+  meeting request/respond. Mobile registers after sign-in, unregisters on sign-out.
+- WhatsApp OTP: request_sign_in(email, channel="whatsapp") uses WhatsApp Cloud API authentication template, config in
+  site_config participant_whatsapp {phone_number_id, access_token, template_name, language}; falls back to email on failure.
+  Email sending lives in participants/invites.py send_sign_in_email.
+- Gate check-in: Event Check In.gate field; scan_checkin(code, scanned_at, gate) (first scan of the day keeps its gate),
+  get_gate_stats for the scanner screen.
+- Tests: buzz/participants/test_*.py and buzz/api/test_participant_checkin.py (mock based). Ran only under a hand-made
+  frappe stub, NOT on a real bench: run `bench --site <site> run-tests --app buzz --module buzz.participants.test_qr` etc.
+  Mobile: `yarn test` (real jest run).
+- Fixed: doctype controller files had unindented `pass` (IndentationError).
+- Not done: per-device session tokens (new sign-in replaces the API secret), push needs EAS project + FCM/APNs creds,
+  WhatsApp template must be approved by Meta. No bench in sandbox.
