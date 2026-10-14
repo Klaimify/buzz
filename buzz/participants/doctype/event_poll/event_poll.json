@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "creation": "2026-10-13 23:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "event",
+  "question",
+  "options",
+  "is_open"
+ ],
+ "fields": [
+  {
+   "fieldname": "event",
+   "fieldtype": "Link",
+   "label": "Event",
+   "options": "Buzz Event",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "question",
+   "fieldtype": "Data",
+   "label": "Question",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "options",
+   "fieldtype": "Small Text",
+   "label": "Options",
+   "reqd": 1,
+   "description": "One option per line."
+  },
+  {
+   "fieldname": "is_open",
+   "fieldtype": "Check",
+   "label": "Open for Voting",
+   "default": "1"
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-13 23:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Participants",
+ "name": "Event Poll",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1,
+   "export": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Event Manager",
+   "write": 1,
+   "export": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "autoname": "hash"
+}
